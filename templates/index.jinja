@@ -1,0 +1,11 @@
+{# Template pour l'index #}
+{% extends "base.jinja" %}
+
+{% block contenu %}
+   <ul>
+         {% for s in service %}
+           <li>{{ s.titre }}</li>
+         {% endfor %}
+    </ul> 
+
+{% endblock %}

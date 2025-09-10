@@ -1,0 +1,61 @@
+// Les fichiers sAss n'ont pas de point-virgule ni d'accolade
+// Vous pouvez utiliser des .scss OU .sass à votre choix
+
+@use "bootstrap"
+
+body
+    @extend .container
+
+
+header
+    @extend .pt-5, .pb-3
+
+    h1
+        @extend .display-2
+
+    p
+        @extend .lead
+
+
+nav, main, footer
+    @extend .pb-5
+
+
+nav
+    ul
+        @extend .nav, .nav-pills
+
+        li
+            @extend .nav-item
+
+            a
+                @extend .nav-link
+
+                &:hover
+                    color: white
+                    background-color: var(--bs-primary)
+
+
+section
+    @extend .pb-4
+
+    h4
+        @extend .mb-2
+
+    p
+        @extend .mb-1
+
+
+footer
+    font-size: 90%
+
+
+main > h2
+    @extend .display-5, .pb-4
+
+
+table
+    @extend .table
+
+    thead
+        @extend .table-light
