@@ -2,10 +2,30 @@
 {% extends "base.jinja" %}
 
 {% block contenu %}
-   <ul>
-         {% for s in service %}
-           <li>{{ s.titre }}</li>
-         {% endfor %}
-    </ul> 
+<div class="container mt-4">
+    {% if service %}
+        <div class="row">
+            {% for s in service %}
+            <div class="col-md-4 mb-4">
+                <div class="card" style="width: 18rem;">
+                <img src="static/images/img1.jpg" class="card-img-top" alt="1">
+                <div class="card-body">
+                    <h5 class="card-title">{{ s.titre }}</h5>
+                    <p class="card-text">{{s.localisation}}
+                    </p>
+                    <p class="card-text">{{s.nom_categorie}}
+                    </p>
+                    <a href="/details" class="btn btn-primary">Détails</a>
+                </div>
+            </div>
 
+            </div>
+            
+            {% endfor %}
+        </div>
+    
+    {% else %}
+       <p>Aucun service n'a été ajouté pour le moment.</p>
+    {%endif%}
+</div>    
 {% endblock %}

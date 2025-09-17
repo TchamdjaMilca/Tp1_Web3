@@ -1,0 +1,26 @@
+Template pour l'index
+{% extends "base.jinja" %}
+
+{% block contenu %}
+    
+    {% if service is none%}
+        <p> Aucun serivice</p>
+    {%elif service|length == 0%}
+        <p>Aucun service</p>
+    {% else %}
+        <div>
+        
+                <h3>{{ s.titre }}</h3>
+                <p>{{ s.description }}</p>
+                <p>{{ s.localisation }}</p>
+                <p>{{ s.nom_categorie }}</p>
+                <p>{{ s.prix }}</p>
+                <p>{{ s.date_publication }}</p>
+                <p>{{ s.utilisateur }}</p>
+                <img src="static/images/img1.jpg" class="card-img-top" alt="1">
+                <hr>
+        
+        </div>
+    {% endif %}
+
+{% endblock %}
