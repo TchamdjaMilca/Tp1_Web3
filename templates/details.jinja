@@ -2,25 +2,37 @@ Template pour l'index
 {% extends "base.jinja" %}
 
 {% block contenu %}
-    
-    {% if service is none%}
-        <p> Aucun serivice</p>
-    {%elif service|length == 0%}
-        <p>Aucun service</p>
-    {% else %}
-        <div>
-        
-                <h3>{{ s.titre }}</h3>
-                <p>{{ s.description }}</p>
-                <p>{{ s.localisation }}</p>
-                <p>{{ s.nom_categorie }}</p>
-                <p>{{ s.prix }}</p>
-                <p>{{ s.date_publication }}</p>
-                <p>{{ s.utilisateur }}</p>
-                <img src="static/images/img1.jpg" class="card-img-top" alt="1">
-                <hr>
-        
+    {% if service %}
+
+        <div class="card text-center">
+             <div class="card-header">
+                {% if service.photo%}
+                    <img src="static/images/img2.jpg" class="card-img p-2" width="400" height="600" alt="Image par défaut">
+                {% endif %}
+             </div>
+             <div class="card-body">
+                <h5 class="card-title">{{service.titre}}</h5>
+                <<p class="card-text"><strong>Description: </strong>{{service.description}}</p>
+                <p class="card-text"><strong>Localisation: </strong>{{service.localisation}}</p>
+                <p class="card-text"><strong>Date de création: </strong>{{service.date_creation}}</p>
+                <p class="card-text"><strong>Coût: </strong>{{service.cout}} </p>
+                <p class="card-text"><strong>Categorie: </strong>{{service.categorie}}</p>
+                <p class="card-text"><strong>Actif: </strong>
+                    {% if service.actif%}
+                        Actif
+                    {% else %}
+                        Inactif
+                    {% endif %}
+                </p>
+                <a href="#" class="btn btn-primary">Modifier service</a>
+             </div>
+            <div class="card-footer text-body-secondary">
+                2 days ago
+            </div>
         </div>
+        
+    {% else %}
+        <p>Aucun service trouvé.</p>
     {% endif %}
 
 {% endblock %}
