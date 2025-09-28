@@ -12,7 +12,7 @@ Template pour l'index
              </div>
              <div class="card-body">
                 <h5 class="card-title">{{service.titre}}</h5>
-                <<p class="card-text"><strong>Description: </strong>{{service.description}}</p>
+                <p class="card-text"><strong>Description: </strong>{{service.description}}</p>
                 <p class="card-text"><strong>Localisation: </strong>{{service.localisation}}</p>
                 <p class="card-text"><strong>Date de création: </strong>{{service.date_creation}}</p>
                 <p class="card-text"><strong>Coût: </strong>{{service.cout}} </p>
@@ -24,11 +24,10 @@ Template pour l'index
                         Inactif
                     {% endif %}
                 </p>
-                <a href="#" class="btn btn-primary">Modifier service</a>
+                <a href="modifier?id={{ service.id_service }}" class="btn btn-primary">Modifier service</a>
              </div>
-            <div class="card-footer text-body-secondary">
-                2 days ago
-            </div>
+             <div class="card-footer text-body-secondary">
+                 Dernière mise à jour : {{ service.date_creation }}
         </div>
         
     {% else %}

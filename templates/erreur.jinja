@@ -1,0 +1,13 @@
+{# Template pour l'index #}
+{% extends "base.jinja" %}
+
+{% block contenu %}
+    <div class="container mt-5">
+        <div class="alert alert-danger text-center" role="alert">
+            <h4 class="alert-heading">Oups ! Une erreur est survenue</h4>
+            <p>{{ message }}</p>
+            <hr>
+            <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+        </div>
+    </div>
+{% endblock %}

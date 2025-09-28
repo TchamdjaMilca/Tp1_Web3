@@ -1,27 +1,29 @@
 {# Template pour l'index #}
 {% extends "base.jinja" %}
 
+{% block active_liste %}active fw-bold{% endblock %}
+
 {% block contenu %}
    <div class="container mt-4">
     {% if services %}
         <div class="row">
             {% for s in services %}
-            <div class="col-md-4 mb-4">
-                <div class="card" style="width: 18rem;">
-                <img src="static/images/img2.jpg" class="card-img-top" alt="1">
-                <div class="card-body">
-                    <h5 class="card-title">{{ s.titre }}</h5>
-                    <p class="card-text">{{s.localisation}}
-                    </p>
-                    <p class="card-text">{{s.nom_categorie}}
-                    </p>
-                   
+                <div class="col-md-4 mb-4">
+                    <div class="card text-center mb-3" style="width: 18rem;">
+                        <img src="static/images/img2.jpg" class="card-img-top" alt="1">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ s.titre }}</h5>
+                            <p class="card-text">{{s.localisation}}
+                            </p>
+                            <p class="card-text">{{s.nom_categorie}}
+                            </p>
+                            
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            </div>
             
             {% endfor %}
+            
         </div>
     
     {% else %}

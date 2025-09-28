@@ -1,12 +1,9 @@
-
-{% extends "base.jinja"%}
- 
- 
-{% block active_ajout %}active fw-bold{% endblock %}
+{# Template pour l'index #}
+{% extends "base.jinja" %}
 
 {% block contenu %}
-<h2 class="mb-4 text-center">Ajouter un Nouveau Service</h2>
-    <form method="post" action="/ajout" novalidate="novalidate">
+    <h2 class="mb-4 text-center">Modifier un Service</h2>
+    <form method="post" action="/modifier?id={{ service.id_service }}" novalidate="novalidate">
         <div class="mb-3">
             <label for="titre" class="form-label">Titre</label>
             <input type="text" class="form-control {{ class_titre }}" id="titre" name="titre" required value="{{ titre }}">
@@ -46,15 +43,7 @@
 
         <div class="mb-3">
             <label for="categorie" class="form-label">Catégorie</label>
-            <select class="form-select {{ class_categorie }}" id="categorie" name="categorie" required>
-              <option value="" disabled selected>Sélectionner une catégorie</option>
-                {% for categorie in categories %}
-                    <option value="{{ categorie.id_categorie }}" {% if categorie.id_categorie|string == categorie %}selected{% endif %}>{{ categorie.nom_categorie }}</option>
-                {% endfor %}
-            </select>
-            <div class="invalid-feedback">
-                Veuillez sélectionner une catégorie.
-            </div>
+            <input type="text" class="form-control" id="categorie" name="categorie" value="{{ service.categorie }}" disabled>
         </div>
 
         <div class="mb-3">
@@ -64,7 +53,15 @@
                 Veuillez entrer un nom valide pour la photo.
             </div>
         </div>
-
-        <button type="submit" class="btn btn-primary">Ajouter</button>
+     
+        <button type="submit" class="btn btn-primary">Enregistrer modifications service</button>
+        
     </form>
+       
+            
+            <div class="card-footer text-body-secondary">
+                Dernière mise à jour : {{ service.date_creation }}
+            </div>
+        </div>
+   
 {% endblock %}

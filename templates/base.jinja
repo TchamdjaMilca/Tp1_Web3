@@ -18,25 +18,25 @@
         <div class="container">
             <h1>Mon super site</h1>
 
-            <nav class="navbar navbar-expand-lg bg-body-tertiary">
-                <div class="container-fluid">
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav">
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="/">Accueil</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/ajout">Ajout d'un service</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/liste">Liste de tous les services</a>
-                            </li>
-                        </ul>
-                    </div>
+            <nav class="navbar navbar-expand-lg bg-body-tertiary  border-bottom border-dark-subtle">
+                <div class="container-fluid justify-content-center ">
+                    <ul class="nav nav-underline  ">
+                         <li class="nav-item">
+                             <a class="nav-link {% block active_accueil %}{% endblock %}" href="/">Accueil</a>
+                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% block active_ajout %}{% endblock %}" href="/ajout">Ajouter service</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% block active_liste %}{% endblock %}" href="/liste">Liste services </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="d-flex ms-3">
+                    <a href="/choisir_langue?langue=fr_CA" class="btn btn-outline-primary btn-sm {% if langue=='fr_CA' %}active{% endif %} me-1">FR</a>
+                    <a href="/choisir_langue?langue=en_CA" class="btn btn-outline-primary btn-sm {% if langue=='en_CA' %}active{% endif %} me-1">EN (CA)</a>
+                    <a href="/choisir_langue?langue=en_US" class="btn btn-outline-primary btn-sm {% if langue=='en_US' %}active{% endif %}">EN (US)</a>
                 </div>
             </nav>
 
