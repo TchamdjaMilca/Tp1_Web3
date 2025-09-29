@@ -9,6 +9,7 @@ import re
 import bd
 from flask_babel import Babel,numbers, dates
 from flask.logging import create_logger
+from datetime import date
 
 app = Flask(__name__)
 logger = create_logger(app)
@@ -25,43 +26,46 @@ def get_locale():
 @app.route('/')
 def index():
     """Page d'index"""
-
-    langue = get_locale()
     try:
         with bd.creer_connexion() as conn:
             with conn.get_curseur() as curseur:
                 curseur.execute('SELECT s.id_service,s.titre,s.localisation, c.nom_categorie FROM services s' \
                 ' join categories c on s.id_categorie = c.id_categorie WHERE s.actif=1 ORDER BY s.date_creation DESC LIMIT 5')
                 services = curseur.fetchall()
-
-        date_du_jour = dates.format_date(date.today(), format='long', locale=langue)
-        prix_exemple = numbers.format_currency(123.45, 'CAD' if 'CA' in langue else 'USD', locale=langue)
-        titre_page = titres.get(langue, titres['fr_CA'])
-
-        return render_template('index.jinja', services=services,
-            date_du_jour = date_du_jour,
-            prix_exemple =prix_exemple,
-            titre_page= titre_page,
-            langue=langue)
     except Exception as e:
         print(e)
         return "Erreur de connexion à la base de données",500
-    
+    return render_template('index.jinja', services= services)
+   
 @app.route('/details')
 def details_service():
     """Détails d'un service"""
+    langue = get_locale()
+
     identifiant = request.args.get('id', type =int)
     if not identifiant:
         abort(400,"Identifiant manquant") 
     service={}
     with bd.creer_connexion() as conn:
         with conn.get_curseur() as curseur:
-            curseur.execute('SELECT s.id_service, s.titre, s.description ,s.localisation,s.date_creation, s.actif,s.cout, s.photo, nom_categorie as categorie FROM services s ' \
-            'join categories  on s.id_categorie =c.id_categorie WHERE s.id_service=%(id)s', {'id': identifiant})
+            curseur.execute('SELECT s.id_service, s.titre, s.description ,s.localisation,s.date_creation, s.actif,s.cout, s.photo, c.nom_categorie as categorie FROM services s ' \
+            'join categories c on s.id_categorie =c.id_categorie WHERE s.id_service=%(id)s', {'id': identifiant})
             service = curseur.fetchone()
+
+            date_du_jour = dates.format_date(date.today(), format='long', locale=langue)
+            prix_exemple = numbers.format_currency(123.45, 'CAD' if 'CA' in langue else 'USD', locale=langue)
+            titre_page = titres.get(langue, titres['fr_CA'])
+
             if not service:
-             abort(404,f"Service avec ID {identifiant}non trouvé") 
-    return render_template('details.jinja', service=service)
+                abort(404,f"Service avec ID {identifiant}non trouvé") 
+         
+    return render_template('details.jinja', service=service,
+        date_du_jour = date_du_jour,
+        prix_exemple =prix_exemple,
+        titre_page= titre_page,
+        langue=langue)
+     
+    
   
 @app.route('/ajout', methods=['GET', 'POST'])
 def ajouter_service():
@@ -112,7 +116,7 @@ def ajouter_service():
                         class_categorie = 'is-invalid'
                     if not nom_photo or not format_image.search(nom_photo):
                         class_nom_photo = 'is-invalid'
-                    if not class_titre or class_localisation or class_description or class_cout  or class_categorie or class_nom_photo:
+                    if class_titre or class_localisation or class_description or class_cout  or class_categorie or class_nom_photo:
                         abort(400, "Erreur de validation des champs. Veuillez corriger les erreurs.")
                     curseur.execute("""
                         INSERT INTO services (titre, localisation, description, cout, actif,photo, id_categorie)
@@ -145,7 +149,15 @@ def ajouter_service():
             class_categorie=class_categorie
         )
     except Exception as e:
-        return render_template('ajout.jinja', categories=[], titre=titre, localisation=localisation, description=description, cout=cout, statut=statut, nom_photo=nom_photo,categorie=categorie), 500
+        return render_template(
+            'ajout.jinja', 
+            categories=[], 
+            titre=titre, 
+            localisation=localisation, 
+            description=description, 
+            cout=cout, statut=statut, 
+            nom_photo=nom_photo,
+            categorie=categorie), 500
 
 
 @app.route('/confirmation')
@@ -244,16 +256,19 @@ def liste_service():
 
 @app.errorhandler(400)
 def erreur_400(e):
+    """Logger erreur 400"""
     logger.warning(f"Erreur 400: {e}")
     return render_template('erreur.jinja', message=f"Erreur 400 : {e}"), 400
 
 @app.errorhandler(404)
 def erreur_404(e):
+    """Logger erreur 404"""
     logger.warning(f"Erreur 404: {e}")
     return render_template('erreur.jinja', message=f"Erreur 404 : Page non trouvée ou service inexistant"), 404
 
 @app.errorhandler(500)
 def erreur_500(e):
+    """Logger erreur 500"""
     logger.exception(f"Erreur 500:{e}")
     return render_template('erreur.jinja', message=f"Erreur 500 : Problème serveur ou base de données. Veuillez réessayer plus tard"), 500
 
@@ -262,7 +277,7 @@ def choisir_langue():
     """Change la langue et l'enregistre dans un cookie"""
     lang = request.args.get('langue', default='fr_CA')
     if lang not in ['fr_CA', 'en_CA', 'en_US']:
-        lang = 'fr_CA'  # fallback
+        lang = 'fr_CA' 
     
     reponse = make_response(redirect('/'))
     reponse.set_cookie('langue', lang)

@@ -1,6 +1,7 @@
 
 {% extends "base.jinja"%}
- 
+{% block title %}Ajouter un service{% endblock %}
+
  
 {% block active_ajout %}active fw-bold{% endblock %}
 
@@ -48,8 +49,8 @@
             <label for="categorie" class="form-label">Catégorie</label>
             <select class="form-select {{ class_categorie }}" id="categorie" name="categorie" required>
               <option value="" disabled selected>Sélectionner une catégorie</option>
-                {% for categorie in categories %}
-                    <option value="{{ categorie.id_categorie }}" {% if categorie.id_categorie|string == categorie %}selected{% endif %}>{{ categorie.nom_categorie }}</option>
+                {% for c in categories %}
+                    <option value="{{ c.id_categorie }}" {% if c.id_categorie|string == categorie %}selected{% endif %}>{{ c.nom_categorie }}</option>
                 {% endfor %}
             </select>
             <div class="invalid-feedback">

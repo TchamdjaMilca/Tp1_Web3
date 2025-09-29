@@ -14,8 +14,8 @@ Template pour l'index
                 <h5 class="card-title">{{service.titre}}</h5>
                 <p class="card-text"><strong>Description: </strong>{{service.description}}</p>
                 <p class="card-text"><strong>Localisation: </strong>{{service.localisation}}</p>
-                <p class="card-text"><strong>Date de création: </strong>{{service.date_creation}}</p>
-                <p class="card-text"><strong>Coût: </strong>{{service.cout}} </p>
+                <p class="card-text"><strong>Date de création: </strong>{{date_du_jour}}</p>
+                <p class="card-text"><strong>Coût: </strong>{{prix_exemple}} </p>
                 <p class="card-text"><strong>Categorie: </strong>{{service.categorie}}</p>
                 <p class="card-text"><strong>Actif: </strong>
                     {% if service.actif%}

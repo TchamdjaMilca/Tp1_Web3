@@ -1,6 +1,7 @@
 {# Template pour l'index #}
 {% extends "base.jinja" %}
 
+{% block title %}Accueil{% endblock %}
 
 {% block active_accueil %}active fw-bold{% endblock %}
 
@@ -30,6 +31,6 @@
             
             {% endfor %}
         </div>
-    {%endif%}
+    {% endif %}
 </div>    
 {% endblock %}
