@@ -11,14 +11,6 @@ from flask_babel import Babel,numbers, dates
 from flask.logging import create_logger
 from datetime import date
 
-from compte import bp_compte
-from reservation import bp_reservation
-from service import bp_service
-
-app = Flask(__name__)
-app.register_blueprint(bp_service, url_prefix='/services')
-app.register_blueprint(bp_compte, url_prefix='/comptes')
-app.register_blueprint(bp_reservation, url_prefix='/reservation')
 app = Flask(__name__)
 logger = create_logger(app)
 
@@ -67,7 +59,7 @@ def details_service():
             if not service:
                 abort(404,f"Service avec ID {identifiant}non trouvé") 
          
-    return render_template('Services/details.jinja', service=service,
+    return render_template('details.jinja', service=service,
         date_du_jour = date_du_jour,
         prix_exemple =prix_exemple,
         titre_page= titre_page,
@@ -140,7 +132,7 @@ def ajouter_service():
                     })
                     return redirect('/confirmation', code=303)
         return render_template(
-            'services/ajout.jinja',
+            'ajout.jinja',
             categories=categories,
             titre=titre,
             localisation=localisation,
@@ -171,7 +163,7 @@ def ajouter_service():
 @app.route('/confirmation')
 def redirection_confirmation():
     """Redirection après l'ajout d'un service"""
-    return render_template('services/confirmation.jinja')
+    return render_template('confirmation.jinja')
 
 @app.route('/modifier', methods=['GET', 'POST'])
 def modifier_service():
@@ -235,7 +227,7 @@ def modifier_service():
                 return redirect('/', code=303)
             except Exception as e:
                 abort(500, f"Erreur lors de la mise à jour : {e}")
-    return render_template('services/modifier.jinja',
+    return render_template('modifier.jinja',
         service = service,
         titre=titre,
         localisation=localisation,
@@ -257,28 +249,28 @@ def liste_service():
                 curseur.execute('SELECT s.id_service,s.titre,s.localisation, c.nom_categorie FROM services s' \
                 ' join categories c on s.id_categorie = c.id_categorie ORDER BY s.date_creation DESC ')
                 services = curseur.fetchall()  
-        return render_template('services/liste.jinja', services=services)
+        return render_template('liste.jinja', services=services)
     except Exception as e:
         print(e)    
-        return render_template('erreur/erreur.jinja' , message =f"Erreur de connexion à la base de données"),500
+        return render_template('erreur.jinja' , message =f"Erreur de connexion à la base de données"),500
 
 @app.errorhandler(400)
 def erreur_400(e):
     """Logger erreur 400"""
     logger.warning(f"Erreur 400: {e}")
-    return render_template('erreur/erreur.jinja', message=f"Erreur 400 : {e}"), 400
+    return render_template('erreur.jinja', message=f"Erreur 400 : {e}"), 400
 
 @app.errorhandler(404)
 def erreur_404(e):
     """Logger erreur 404"""
     logger.warning(f"Erreur 404: {e}")
-    return render_template('erreur/erreur.jinja', message=f"Erreur 404 : Page non trouvée ou service inexistant"), 404
+    return render_template('erreur.jinja', message=f"Erreur 404 : Page non trouvée ou service inexistant"), 404
 
 @app.errorhandler(500)
 def erreur_500(e):
     """Logger erreur 500"""
     logger.exception(f"Erreur 500:{e}")
-    return render_template('erreur/erreur.jinja', message=f"Erreur 500 : Problème serveur ou base de données. Veuillez réessayer plus tard"), 500
+    return render_template('erreur.jinja', message=f"Erreur 500 : Problème serveur ou base de données. Veuillez réessayer plus tard"), 500
 
 @app.route('/choisir_langue')
 def choisir_langue():
