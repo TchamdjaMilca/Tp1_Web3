@@ -13,6 +13,8 @@
       <th>Prénom</th>
       <th>Crédit</th>
       <th>Rôle</th>
+      <th>supprimer</th>
+      <th>modifier</th>
     </tr>
   </thead>
   <tbody>
@@ -24,13 +26,20 @@
       <td>{{ u.prenom }}</td>
       <td>{{ u.credit }}</td>
       <td>{{ 'Admin' if u.est_admin else 'Utilisateur' }}</td>
+      <td><a href="" class="btn btn-primary">supprimer</a></td>
+      <td><a href="" class="btn btn-primary">modifier</a></td>
     </tr>
+
     {% endfor %}
+    
   </tbody>
 </table>
+      <a href="{{url_for('comptes.form_ajout_compter')}}" class="btn btn-primary">Ajouter</a>
+    
+    
 {% else %}
 <p>Aucun utilisateur trouvé.</p>
 {% endif %}
 
-<a href="{{ url_for('comptes.deconnecter') }}">Déconnexion</a>
+<a class="btn btn-primary" href="{{ url_for('comptes.deconnecter') }}">Déconnexion</a>
 {% endblock %}

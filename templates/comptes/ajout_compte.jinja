@@ -1,0 +1,80 @@
+{% extends "base.jinja"%}
+{% block title %}Ajouter un service{% endblock %}
+
+
+
+{% block contenu %}
+<h2 class="mb-4 text-center">Ajouter un Nouveau Utilisateur</h2>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+
+<div class="container mt-5">
+    <h1 class="mb-4">Ajouter un compte</h1>
+
+    <form method="post" action="{{ url_for('comptes.ajouter_compte') }}">
+
+        <div class="mb-3">
+            <label for="prenom" class="form-label">Prénom</label>
+            <input type="text" class="form-control" id="prenom" name="prenom" value="{{prenom}}">
+             {% for category, message in messages %}
+            {% if category == 'prenom' %}
+            <div class="error alert alert-danger">{{ message }}</div>
+            {% endif %}
+            {% endfor %}
+        </div>
+       
+        <div class="mb-3">
+            <label for="nom" class="form-label">Nom</label>
+            <input type="text" class="form-control" id="nom" value="{{nom}}" name="nom" >
+             {% for category, message in messages %}
+            {% if category == 'nom' %}
+            <div class="error alert alert-danger">{{ message }}</div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <div class="mb-3">
+            <label for="courriel" class="form-label">Courriel</label>
+            <input type="email" class="form-control" id="courriel" value="{{courriel}}" name="courriel" >
+             {% for category, message in messages %}
+            {% if category == 'courriel' %}
+            <div class="error alert alert-danger">{{ message }}</div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+
+        <div class="mb-3">
+            <label for="mot_de_passe" class="form-label">Mot de passe</label>
+            <input type="mot_de_passe" class="form-control" id="mot_de_passe" value="{{mot_de_passe}}" name="mot_de_passe" >
+             {% for category, message in messages %}
+            {% if category == 'mot_de_passe' %}
+            <div class="error alert alert-danger">{{ message }}</div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+
+        <div class="mb-3">
+            <label for="confirmation_mot_de_passe" class="form-label">Confirmer le mot de passe</label>
+            <input type="password" class="form-control" id="confirmation_mot_de_passe" value="{{confirmation_mot_de_passe}}" name="confirmation_mot_de_passe" >
+            {% for category, message in messages %}
+            {% if category == 'confirmation_mot_de_passe' %}
+            <div class="error alert alert-danger">{{ message }}</div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {% for category, message in messages %}
+            {% if category == 'utilisateur_existe' %}
+            <div class="error alert alert-danger">{{ message }}</div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Créer le compte</button>
+        <a href="/" class="btn btn-secondary">Annuler</a>
+    </form>
+    
+       {% endwith %}
+</div>
+{% endblock %}

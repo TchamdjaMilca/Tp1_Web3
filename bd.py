@@ -65,3 +65,8 @@ def liste_utilisateurs(conn):
 
 
 
+def ajouter_utilisateurs(conn, courriel, mot_de_passe, nom, prenom):
+    """"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""INSERT INTO utilisateurs (courriel, mot_de_passe, nom, prenom, credit)
+        VALUES (%s, %s, %s, %s, 0) """, (courriel, mot_de_passe, nom, prenom),)     
