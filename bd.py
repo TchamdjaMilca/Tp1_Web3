@@ -14,7 +14,7 @@ def creer_connexion():
         user="garneau",
         password="qwerty_123",
         host="127.0.0.1",
-        database="services_particuliers",
+        database="services",
         raise_on_warnings=True
     )
 
@@ -40,3 +40,28 @@ def get_curseur(self):
         yield curseur
     finally:
         curseur.close()
+
+def chercher_utilisateur(conn, courriel, mdp_hache):
+    """Retourne un utilisateur si le courriel et le mot de passe correspondent"""
+    print("DEBUG query:", courriel, mdp_hache)
+
+    with conn.get_curseur() as curseur:
+        curseur.execute(
+            "SELECT * FROM utilisateurs WHERE courriel=%s AND mot_de_passe=%s",
+            (courriel, mdp_hache)
+        )
+        utilisateur = curseur.fetchone()
+        if utilisateur:
+            utilisateur["est_admin"] = bool(utilisateur["est_admin"])
+        return utilisateur
+def liste_utilisateurs(conn):
+    """Retourne la liste complète des utilisateurs."""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT id_utilisateur, courriel, nom, prenom, credit, est_admin
+            FROM utilisateurs
+        """)
+        return curseur.fetchall()
+
+
+

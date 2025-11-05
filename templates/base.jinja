@@ -7,8 +7,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="https://www.cegepgarneau.ca/favicon.ico" />
-    <link href="static/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="static/css/styles.css" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{url_for ('static', filename ='css/styles.css')}}" />
 
 </head>
 
@@ -32,6 +32,10 @@
                         <li class="nav-item">
                             <a class="nav-link {% block active_liste %}{% endblock %}" href="/liste">Liste services </a>
                         </li>
+                         <li class="nav-item">
+                            <a class="nav-link {% block active_compte %}{% endblock %}" href="{{ url_for('comptes.connexion') }}">Se connecter</a>
+
+                        </li>
                     </ul>
                 </div>
 
@@ -52,9 +56,9 @@
 
     <main>
         {% block contenu %}
-        <ul>
+        {# <ul>
             <li></li>
-        </ul>
+        </ul> #}
         {% endblock %}
 
     </main>

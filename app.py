@@ -11,16 +11,21 @@ from flask_babel import Babel,numbers, dates
 from flask.logging import create_logger
 from datetime import date
 
-from compte import bp_compte
-from reservation import bp_reservation
-from service import bp_service
+from routes_compte import bp_compte
+from routes_reservation import bp_reservation
+from routes_service import bp_service
 
 app = Flask(__name__)
 app.register_blueprint(bp_service, url_prefix='/services')
 app.register_blueprint(bp_compte, url_prefix='/comptes')
 app.register_blueprint(bp_reservation, url_prefix='/reservation')
-app = Flask(__name__)
+
 logger = create_logger(app)
+
+
+app.secret_key = "Cette chaîne servira pour l'encryption de la session. \
+                  Elle doit être générée aléatoirement"
+# app.secret_key ="e81ea91a141620d25a70f65c4d02e81d1a5fa7c8a5bc8fa8df6eda83300402ad"
 
 titres = {
     'fr_CA': 'Bonjour, bienvenue sur notre site !',
@@ -67,7 +72,7 @@ def details_service():
             if not service:
                 abort(404,f"Service avec ID {identifiant}non trouvé") 
          
-    return render_template('Services/details.jinja', service=service,
+    return render_template('services/details.jinja', service=service,
         date_du_jour = date_du_jour,
         prix_exemple =prix_exemple,
         titre_page= titre_page,

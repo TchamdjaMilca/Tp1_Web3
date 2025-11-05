@@ -1,0 +1,20 @@
+
+{% extends "base.jinja" %}
+
+{% block contenu %}
+  <h2>Connexion</h2>
+
+  <form method="POST" action="{{ url_for('comptes.connexion') }}" novalidate="novalidate">
+    <div>
+      <label for="courriel">Courriel :</label>
+      <input type="email" name="courriel" id="courriel" required>
+    </div>
+
+    <div>
+      <label for="mot_de_passe">Mot de passe :</label>
+      <input type="password" name="mot_de_passe" id="mot_de_passe" required>
+    </div>
+
+    <button type="submit">Se connecter</button>
+  </form>
+{% endblock %}
