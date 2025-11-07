@@ -93,7 +93,7 @@ def ajouter_compte():
         prenom = request.form.get("prenom","").strip()
         courriel = request.form.get("courriel","").strip()
         mot_de_passe = request.form.get("mot_de_passe", "").strip()
-        confirmation_dot_de_pass = request.form.get("confirmation_mot_de_passe", "").strip()
+        confirmation_dot_de_passe = request.form.get("confirmation_mot_de_passe", "").strip()
         if not nom or caracteres_interdits.search(nom):
             flash("Veuillez entrer un nom valide","nom")
             erreur = True
@@ -106,22 +106,36 @@ def ajouter_compte():
         if not mot_de_passe or not re.match(regex_mot_de_passe, mot_de_passe):
             flash("Veuillez entrer un mot de passe valide (au moins 8 caractères, avec majuscule, minuscule et chiffre).", "mot_de_passe")
             erreur = True
-        if mot_de_passe != confirmation_dot_de_pass:
-            flash("Veuillez confirmer correctement votre mot de passe.", "confirmation_mot_de_pass")
+        if mot_de_passe != confirmation_dot_de_passe:
+            flash("Veuillez confirmer correctement votre mot de passe.", "confirmation_mot_de_passe")
             erreur = True
         if erreur:
-            return render_template("comptes/ajout_compte.jinja", confirmation_dot_de_pass = confirmation_dot_de_pass, courriel = courriel, mot_de_passe = mot_de_passe,nom = nom, prenom = prenom )
-        if not erreur:
-           with bd.creer_connexion() as connexion:
-              utilisateur = bd.chercher_utilisateur(connexion, courriel,mot_de_passe)
-              if not utilisateur:
-                flash("L'utilisateur existe déjà.","utilisateur_existe")
-                erreur = True
-           return render_template("comptes/ajout_compte.jinja", confirmation_dot_de_pass = confirmation_dot_de_pass, courriel = courriel, mot_de_passe = mot_de_passe,nom = nom, prenom = prenom )
-
-
+            return render_template("comptes/ajout_compte.jinja", confirmation_dot_de_passe = confirmation_dot_de_passe, courriel = courriel, mot_de_passe = mot_de_passe,nom = nom, prenom = prenom )
+        mot_de_passe = hacher_mdp(mot_de_passe)
+        with bd.creer_connexion() as connexion:
+            utilisateur = bd.chercher_utilisateur(connexion, courriel,mot_de_passe)
+            if utilisateur:
+               flash("L'utilisateur existe déjà.","utilisateur_existe")
+               return render_template("comptes/ajout_compte.jinja", confirmation_dot_de_passe = confirmation_dot_de_passe, courriel = courriel, mot_de_passe = mot_de_passe,nom = nom, prenom = prenom )
+            bd.ajouter_utilisateurs(connexion,courriel, mot_de_passe, nom, prenom)
+            return redirect(url_for("comptes.liste_utilisateurs"))
 
     if not erreur:
         with bd.creer_connexion() as connexion:
             bd.ajouter_utilisateurs(connexion,courriel, mot_de_passe, nom, prenom)
             return redirect("comptes/liste_utilisateurs.jinja")
+
+@bp_compte.route("/supprimer/<int:id_service>")
+def supprimmer_service(id_service):
+    """Permet à un utilisateur de supprimer un service qu'il a ajouté et non réservé"""
+
+    id_utilisateur = session.get("id_utilisateur")
+
+    with bd.creer_connexion() as connexion:
+        succes = bd.supprimer_service(connexion, id_service, id_utilisateur)
+        if succes:
+            flash(" Service supprimé avec succès.", "succes")
+        else:
+            flash(" Impossible de supprimer ce service déjà réservé .", "Impossible")
+
+    return redirect(url_for("services.liste_service"))

@@ -70,3 +70,10 @@ def ajouter_utilisateurs(conn, courriel, mot_de_passe, nom, prenom):
     with conn.get_curseur() as curseur:
         curseur.execute("""INSERT INTO utilisateurs (courriel, mot_de_passe, nom, prenom, credit)
         VALUES (%s, %s, %s, %s, 0) """, (courriel, mot_de_passe, nom, prenom),)     
+def supprimer_service(conn, id_service, id_proprietaire):
+    """Supprime un service seulement si :il appartient à l'utilisateur, il n'a pas encore été réservé. Retourne True si la suppression a réussi, False sinon."""
+    with conn.get_curseur() as curseur:
+        curseur.execute(""" DELETE FROM services WHERE id_service = %s AND id_proprietaire = %s AND id_service NOT IN
+         (SELECT id_service FROM reservations)""", (id_service, id_proprietaire))
+        conn.commit()
+        return curseur.rowcount > 0
