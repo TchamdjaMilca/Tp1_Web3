@@ -38,7 +38,7 @@ def connexion():
                         session["nom"] = utilisateur["nom"]
                         session["est_admin"] = utilisateur["est_admin"]
 
-                        flash(f"Bienvenue {utilisateur['nom']} !", "success")
+                        flash(f"Bienvenue {utilisateur['nom']} !")
                         print (utilisateur["est_admin"], "allo")
                         if utilisateur["est_admin"]:
                             return render_template('comptes/admin.jinja', utilisateur=utilisateur)
@@ -46,10 +46,10 @@ def connexion():
                            return render_template('comptes/utilisateur.jinja', utilisateur=utilisateur)
 
                     else:
-                        flash("Courriel ou mot de passe incorrect.", "danger")
+                        flash("Courriel ou mot de passe incorrect.")
             except Exception as e:
                 app.logger.exception("Erreur BD lors de l'authentification: %s", e)
-                flash("Erreur serveur. Réessayez plus tard.", "danger")
+                flash("Erreur serveur. Réessayez plus tard.")
         else:
            
             for champ, message in erreur.items():
@@ -73,9 +73,9 @@ def deconnecter():
     if "utilisateur" in session:
         nom = session.get("nom") or session.get("utilisateur")
         session.clear()
-        flash(f"{nom} a été déconnecté avec succès.", "info")
+        flash(f"{nom} a été déconnecté avec succès.")
     else:
-        flash("Aucun utilisateur n'était connecté.", "warning")
+        flash("Aucun utilisateur n'était connecté.")
 
     return redirect("/") 
 
@@ -125,17 +125,26 @@ def ajouter_compte():
             bd.ajouter_utilisateurs(connexion,courriel, mot_de_passe, nom, prenom)
             return redirect("comptes/liste_utilisateurs.jinja")
 
-@bp_compte.route("/supprimer/<int:id_service>")
-def supprimmer_service(id_service):
-    """Permet à un utilisateur de supprimer un service qu'il a ajouté et non réservé"""
 
-    id_utilisateur = session.get("id_utilisateur")
+@bp_compte.route("/supprimer_compte/<int:id_utilisateur>", methods=["POST"])
+def supprimer_compte(id_utilisateur):
+    """Permet à l’administrateur de supprimer un compte"""
 
-    with bd.creer_connexion() as connexion:
-        succes = bd.supprimer_service(connexion, id_service, id_utilisateur)
-        if succes:
-            flash(" Service supprimé avec succès.", "succes")
-        else:
-            flash(" Impossible de supprimer ce service déjà réservé .", "Impossible")
+    if "utilisateur" not in session:
+        flash("Vous devez être connecté pour effectuer cette action.")
+        return redirect("/comptes/connexion")
 
-    return redirect(url_for("services.liste_service"))
+    if session.get("est_admin") != 1:
+        flash("Accès réservé à l’administrateur.")
+        return redirect("/")
+
+    try:
+        with bd.creer_connexion() as conn:
+            bd.supprimer_utilisateur(conn, id_utilisateur)
+            flash("Le compte a été supprimé avec succès.")
+    except Exception as e:
+        app.logger.exception("Erreur BD lors de la suppression du compte: %s", e)
+        flash("Erreur serveur. Réessayez plus tard.")
+
+    return redirect(url_for("comptes.liste_utilisateurs"))
+

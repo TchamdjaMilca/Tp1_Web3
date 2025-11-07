@@ -26,8 +26,12 @@
       <td>{{ u.prenom }}</td>
       <td>{{ u.credit }}</td>
       <td>{{ 'Admin' if u.est_admin else 'Utilisateur' }}</td>
-      <td><a href="" class="btn btn-primary">supprimer</a></td>
-      <td><a href="" class="btn btn-primary">modifier</a></td>
+      <td>  
+      <form method="POST" 
+              action="{{ url_for('comptes.supprimer_compte', id_utilisateur=u.id_utilisateur) }}" 
+              class="form-suppression">
+          <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+        </form>
     </tr>
 
     {% endfor %}

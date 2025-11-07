@@ -62,9 +62,14 @@ def liste_utilisateurs(conn):
             FROM utilisateurs
         """)
         return curseur.fetchall()
-
-
-
+    
+def supprimer_utilisateur(conn, id_utilisateur):
+    """Supprimer un utilisateur. """
+    with conn.get_curseur() as curseur:
+        curseur.execute(
+            "DELETE FROM utilisateurs WHERE id_utilisateur = %s",
+            (id_utilisateur,)
+        )
 def ajouter_utilisateurs(conn, courriel, mot_de_passe, nom, prenom):
     """"""
     with conn.get_curseur() as curseur:
