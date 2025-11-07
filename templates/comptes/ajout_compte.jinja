@@ -44,7 +44,7 @@
 
         <div class="mb-3">
             <label for="mot_de_passe" class="form-label">Mot de passe</label>
-            <input type="mot_de_passe" class="form-control" id="mot_de_passe" value="{{mot_de_passe}}" name="mot_de_passe" >
+            <input type="password" class="form-control" id="mot_de_passe" value="{{mot_de_passe}}" name="mot_de_passe" >
              {% for category, message in messages %}
             {% if category == 'mot_de_passe' %}
             <div class="error alert alert-danger">{{ message }}</div>
