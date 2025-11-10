@@ -58,23 +58,42 @@ def liste_utilisateurs(conn):
     """Retourne la liste complète des utilisateurs."""
     with conn.get_curseur() as curseur:
         curseur.execute("""
-            SELECT id_utilisateur, courriel, nom, prenom, credit, est_admin
-            FROM utilisateurs
+            SELECT * FROM utilisateurs
         """)
         return curseur.fetchall()
-    
-def supprimer_utilisateur(conn, id_utilisateur):
-    """Supprimer un utilisateur. """
+
+def liste_services(conn):
+    """Retourne la liste complète des utilisateurs."""
     with conn.get_curseur() as curseur:
-        curseur.execute(
-            "DELETE FROM utilisateurs WHERE id_utilisateur = %s",
-            (id_utilisateur,)
-        )
+        curseur.execute("""
+            SELECT * FROM services
+        """)
+        return curseur.fetchall()
+
 def ajouter_utilisateurs(conn, courriel, mot_de_passe, nom, prenom):
     """"""
     with conn.get_curseur() as curseur:
         curseur.execute("""INSERT INTO utilisateurs (courriel, mot_de_passe, nom, prenom, credit)
         VALUES (%s, %s, %s, %s, 0) """, (courriel, mot_de_passe, nom, prenom),)     
+
+def supprimer_service(connexion, id_service, id_utilisateur):
+    """
+    Supprime un service seulement si :
+    - il appartient à l'utilisateur
+    - il n'a pas encore été réservé 
+    Retourne True si la suppression a réussi, False sinon.
+    """
+    try:
+        with connexion.cursor(dictionary=True) as curseur:
+            requete = """
+                
+                )
+            """
+            curseur.execute(requete, (id_service, id_utilisateur))
+            connexion.commit()
+            return curseur.rowcount > 0
+    except Exception as e:
+        print(e) 
 def supprimer_service(conn, id_service, id_proprietaire):
     """Supprime un service seulement si :il appartient à l'utilisateur, il n'a pas encore été réservé. Retourne True si la suppression a réussi, False sinon."""
     with conn.get_curseur() as curseur:
@@ -82,3 +101,26 @@ def supprimer_service(conn, id_service, id_proprietaire):
          (SELECT id_service FROM reservations)""", (id_service, id_proprietaire))
         conn.commit()
         return curseur.rowcount > 0
+def supprimer_utilisateur(conn, id_utilisateur):
+    """Supprimer un utilisateur. """
+    with conn.get_curseur() as curseur:
+        curseur.execute(
+            "DELETE FROM utilisateurs WHERE id_utilisateur = %s",
+            (id_utilisateur,)
+        )
+def verifier_disponibilite(conn,id_service, date_reservation, heure_reservation):
+    """Vérifie si le service est libre à ce moment-là."""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT COUNT(*) AS total
+            FROM reservations
+            WHERE id_service = %s
+            AND date_reservation = %s
+            AND heure_reservation = %s
+        """, (id_service, date_reservation, heure_reservation))
+        resultat = curseur.fetchone()
+        return resultat["total"] == 0
+def chercher_service_par_id(conn, id_service):
+    with conn.get_curseur() as curseur:
+        curseur.execute("SELECT * FROM services WHERE id_service = %s", (id_service,))
+        return curseur.fetchone()

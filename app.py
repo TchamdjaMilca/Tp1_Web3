@@ -3,8 +3,9 @@ Pour démontrer l'utilisation des templates
 """
 
 import random
+import os
 
-from flask import Flask, render_template, request , abort  , redirect , make_response  
+from flask import Flask, render_template, request , abort  , redirect , make_response,session
 import re
 import bd
 from flask_babel import Babel,numbers, dates
@@ -19,6 +20,11 @@ app = Flask(__name__)
 app.register_blueprint(bp_service, url_prefix='/services')
 app.register_blueprint(bp_compte, url_prefix='/comptes')
 app.register_blueprint(bp_reservation, url_prefix='/reservation')
+
+app.config['MORCEAUX_VERS_IMAGES'] = ["static", "images"]
+app.config['ROUTE_VERS_IMAGES'] = "/".join(app.config['MORCEAUX_VERS_IMAGES'])
+app.config['CHEMIN_VERS_IMAGES'] = os.path.join(app.root_path, *app.config['MORCEAUX_VERS_IMAGES'])
+
 
 logger = create_logger(app)
 
@@ -68,6 +74,9 @@ def details_service():
             date_du_jour = dates.format_date(date.today(), format='long', locale=langue)
             prix_exemple = numbers.format_currency(123.45, 'CAD' if 'CA' in langue else 'USD', locale=langue)
             titre_page = titres.get(langue, titres['fr_CA'])
+            if service and service["photo"]:
+                service["src"] = f"/{app.config['ROUTE_VERS_IMAGES']}/{service['photo']}"
+ 
 
             if not service:
                 abort(404,f"Service avec ID {identifiant}non trouvé") 
@@ -83,7 +92,13 @@ def details_service():
 @app.route('/ajout', methods=['GET', 'POST'])
 def ajouter_service():
     """Ajout d'un nouveau service avec validation"""
+
+    id_proprietaire = session.get("id_utilisateur")
+    if not id_proprietaire:
+        abort(401, "Authentification requise")
+
  
+
     caracteres_interdits = re.compile('<|>')
     format_image = re.compile(r'^[\w,\s-]+\.(jpg|jpeg|png|gif)$', re.IGNORECASE)
     class_titre = ''
@@ -100,6 +115,7 @@ def ajouter_service():
     statut = ''
     categorie = ''
     nom_photo= ''
+
  
     try:
         with bd.creer_connexion() as conn:
@@ -114,7 +130,8 @@ def ajouter_service():
                     cout = request.form.get('cout', '').strip()
                     statut = 1 if request.form.get('statut') == '1' else 0
                     categorie = request.form.get('categorie', '').strip()
-                    nom_photo = request.form.get('photo', '').strip()
+                    photo = request.files.get('photo')
+                    
  
                     if not titre or len(titre) > 50 or caracteres_interdits.search(titre):
                         class_titre = 'is-invalid'
@@ -127,21 +144,30 @@ def ajouter_service():
                         class_cout = 'is-invalid'
                     if not categorie or not any(str(cat['id_categorie']) == categorie for cat in categories):
                         class_categorie = 'is-invalid'
-                    if not nom_photo or not format_image.search(nom_photo):
+                    if not photo or not format_image.search(photo.filename):
                         class_nom_photo = 'is-invalid'
+                    else:
+                        chemin_complet = os.path.join(app.config['CHEMIN_VERS_IMAGES'], photo.filename)
+                        photo.save(chemin_complet)
+
+                   
                     if class_titre or class_localisation or class_description or class_cout  or class_categorie or class_nom_photo:
-                        abort(400, "Erreur de validation des champs. Veuillez corriger les erreurs.")
+                       print("DEBUG VALIDATION:",
+                        class_titre, class_localisation, class_description,
+                        class_cout, class_categorie, class_nom_photo)
+                       abort(400, "Erreur de validation des champs. Veuillez corriger les erreurs.")
                     curseur.execute("""
-                        INSERT INTO services (titre, localisation, description, cout, actif,photo, id_categorie)
-                         VALUES (%(titre)s, %(localisation)s, %(description)s, %(cout)s, %(statut)s,%(nom_photo)s ,%(categorie)s)
+                        INSERT INTO services (titre, localisation, description, cout, actif,photo, id_categorie, id_proprietaire)
+                         VALUES (%(titre)s, %(localisation)s, %(description)s, %(cout)s, %(statut)s,%(nom_photo)s ,%(categorie)s, %(id_proprietaire)s)
                         """, {
                             'titre': titre,
                             'localisation': localisation,
                             'description': description,
                             'cout': cout,
                             'statut': statut,
-                            'nom_photo': nom_photo,
-                            'categorie': categorie
+                            'nom_photo': photo.filename,
+                            'categorie': categorie,
+                            'id_proprietaire': id_proprietaire  
                     })
                     return redirect('/confirmation', code=303)
         return render_template(
@@ -163,13 +189,13 @@ def ajouter_service():
         )
     except Exception as e:
         return render_template(
-            'ajout.jinja', 
+            'services/ajout.jinja', 
             categories=[], 
             titre=titre, 
             localisation=localisation, 
             description=description, 
             cout=cout, statut=statut, 
-            nom_photo=nom_photo,
+            nom_photo=photo.filename,
             categorie=categorie), 500
 
 
@@ -177,7 +203,6 @@ def ajouter_service():
 def redirection_confirmation():
     """Redirection après l'ajout d'un service"""
     return render_template('services/confirmation.jinja')
-
 @app.route('/modifier', methods=['GET', 'POST'])
 def modifier_service():
     """ Modifier les services de la base de données"""
@@ -207,7 +232,7 @@ def modifier_service():
     description = service["description"]
     cout = service["cout"]
     statut = str(service["actif"])
-    photo = service["photo"]
+    photo_nom= service["photo"]
 
     if request.method == 'POST':
         titre = request.form.get('titre', '').strip()
@@ -215,7 +240,8 @@ def modifier_service():
         description = request.form.get('description', '').strip()
         cout = request.form.get('cout', '').strip()
         statut = 1 if request.form.get('statut') =='1' else 0
-        photo = request.form.get('photo', '').strip()
+        photo = request.files.get('photo')
+
 
         if not titre or len(titre) > 50 or caracteres_interdits.search(titre):
             class_titre = 'is-invalid'
@@ -225,8 +251,17 @@ def modifier_service():
             class_description = 'is-invalid'
         if not cout or float(cout) < 0:
             class_cout = 'is-invalid'
-        if not photo or not format_image.search(photo):
-            class_nom_photo = 'is-invalid'
+        if photo and photo.filename:
+            if not format_image.search(photo.filename):
+                class_nom_photo = 'is-invalid'
+            else:
+                chemin_complet = os.path.join(app.config['CHEMIN_VERS_IMAGES'], photo.filename)
+                photo.save(chemin_complet)
+                photo_nom = photo.filename
+        else:
+            photo_nom = service["photo"]
+
+
 
         if not (class_titre or class_localisation or class_description or class_cout or class_nom_photo):
             try:
@@ -236,7 +271,7 @@ def modifier_service():
                             UPDATE services
                             SET titre=%s, localisation=%s, description=%s, cout=%s, actif=%s, photo=%s
                             WHERE id_service=%s
-                            """, (titre, localisation,description, cout, statut,photo, identifiant))
+                            """, (titre, localisation,description, cout, statut,photo_nom, identifiant))
                 return redirect('/', code=303)
             except Exception as e:
                 abort(500, f"Erreur lors de la mise à jour : {e}")
@@ -247,7 +282,7 @@ def modifier_service():
         description=description,
         cout=cout,
         statut=str(statut),
-        photo=photo,
+        photo=photo_nom,
         class_titre=class_titre,
         class_localisation=class_localisation,
         class_description=class_description,
@@ -258,13 +293,23 @@ def liste_service():
     """Afficher les services de la base de données"""
     try:
         with bd.creer_connexion() as conn:
-            with conn.get_curseur() as curseur:
-                curseur.execute('SELECT s.id_service,s.titre,s.localisation, c.nom_categorie FROM services s' \
-                ' join categories c on s.id_categorie = c.id_categorie ORDER BY s.date_creation DESC ')
-                services = curseur.fetchall()  
-        return render_template('services/liste.jinja', services=services)
+            with conn.get_curseur() as curseur: 
+                curseur.execute("""
+                    SELECT s.id_service, s.titre, s.description, s.localisation, 
+                           s.photo, s.id_proprietaire, s.actif, s.cout,
+                           c.nom_categorie
+                    FROM services s
+                    JOIN categories c ON s.id_categorie = c.id_categorie
+                    ORDER BY s.date_creation DESC
+                """)
+                services = curseur.fetchall()
+
+        for s in services:
+                s["src"] = f"/{app.config['ROUTE_VERS_IMAGES']}/{s['photo']}"
+           
+
+        return render_template('services/liste.jinja', services=services,s=s)
     except Exception as e:
-        print(e)    
         return render_template('erreur/erreur.jinja' , message =f"Erreur de connexion à la base de données"),500
 
 @app.errorhandler(400)
@@ -278,6 +323,15 @@ def erreur_404(e):
     """Logger erreur 404"""
     logger.warning(f"Erreur 404: {e}")
     return render_template('erreur/erreur.jinja', message=f"Erreur 404 : Page non trouvée ou service inexistant"), 404
+@app.errorhandler(401)
+def erreur_401(e):
+    """Affiche une page 401 avec un lien vers la connexion"""
+    logger.warning(f"Erreur 401: {e}")
+    return render_template(
+        "erreur/erreur.jinja",
+        message="Vous devez être connecté pour accéder à cette page.",
+    ), 401
+
 
 @app.errorhandler(500)
 def erreur_500(e):

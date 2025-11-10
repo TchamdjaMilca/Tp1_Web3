@@ -3,7 +3,7 @@
 
 {% block contenu %}
     <h2 class="mb-4 text-center">Modifier un Service</h2>
-    <form method="post" action="/modifier?id={{ service.id_service }}" novalidate="novalidate">
+    <form method="post" enctype="multipart/form-data" action="/modifier?id={{ service.id_service }}" novalidate="novalidate">
         <div class="mb-3">
             <label for="titre" class="form-label">Titre</label>
             <input type="text" class="form-control {{ class_titre }}" id="titre" name="titre" required value="{{ titre }}">
@@ -48,7 +48,7 @@
 
         <div class="mb-3">
             <label for="photo" class="form-label">Photo (nom)</label>
-            <input type="text" class="form-control {{ class_nom_photo }}" id="photo" name="photo" value="{{ photo }}">
+            <input type="file" class="form-control {{ class_nom_photo }}" id="photo" name="photo" value="{{ photo }}">
             <div class="invalid-feedback">
                 Veuillez entrer un nom valide pour la photo.
             </div>

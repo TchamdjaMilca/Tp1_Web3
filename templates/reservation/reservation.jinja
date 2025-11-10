@@ -1,0 +1,32 @@
+{% extends "base.jinja" %}
+{% block title %}Réservation{% endblock %}
+{% block contenu %}
+
+<div class="container mt-4">
+  <h2 class="text-center mb-4">Réserver le service</h2>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">{{ service.titre }}</h5>
+      <p><strong>Description :</strong> {{ service.description }}</p>
+      <p><strong>Localisation :</strong> {{ service.localisation }}</p>
+      <p><strong>Coût :</strong> {{ service.cout }} $</p>
+    </div>
+  </div>
+
+  <form method="POST" class="border p-4 rounded bg-light">
+    <div class="mb-3">
+      <label for="date_reservation" class="form-label">Date</label>
+      <input type="date" id="date_reservation" name="date_reservation" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="heure_reservation" class="form-label">Heure</label>
+      <input type="time" id="heure_reservation" name="heure_reservation" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Vérifier la disponibilité</button>
+  </form>
+</div>
+
+{% endblock %}
