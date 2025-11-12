@@ -1,5 +1,5 @@
 """
-Connexion à la BD
+COnnexion à la BD
 """
 
 import types
@@ -9,7 +9,7 @@ import mysql.connector
 
 @contextlib.contextmanager
 def creer_connexion():
-    """Pour créer une connexion à la BD"""
+    """Crée une connexion à la base de données MySQL"""
     conn = mysql.connector.connect(
         user="garneau",
         password="qwerty_123",
@@ -18,7 +18,6 @@ def creer_connexion():
         raise_on_warnings=True
     )
 
-    # Pour ajouter la méthode getCurseur() à l'objet connexion
     conn.get_curseur = types.MethodType(get_curseur, conn)
 
     try:
@@ -34,17 +33,16 @@ def creer_connexion():
 
 @contextlib.contextmanager
 def get_curseur(self):
-    """Permet d'avoir les enregistrements sous forme de dictionnaires"""
+    """Permet d’avoir les enregistrements sous forme de dictionnaires"""
     curseur = self.cursor(dictionary=True)
     try:
         yield curseur
     finally:
         curseur.close()
 
+
 def chercher_utilisateur(conn, courriel, mdp_hache):
     """Retourne un utilisateur si le courriel et le mot de passe correspondent"""
-    print("DEBUG query:", courriel, mdp_hache)
-
     with conn.get_curseur() as curseur:
         curseur.execute(
             "SELECT * FROM utilisateurs WHERE courriel=%s AND mot_de_passe=%s",
@@ -54,73 +52,137 @@ def chercher_utilisateur(conn, courriel, mdp_hache):
         if utilisateur:
             utilisateur["est_admin"] = bool(utilisateur["est_admin"])
         return utilisateur
+
+
 def liste_utilisateurs(conn):
-    """Retourne la liste complète des utilisateurs."""
+    """Retourne la liste complète des utilisateurs"""
     with conn.get_curseur() as curseur:
-        curseur.execute("""
-            SELECT * FROM utilisateurs
-        """)
+        curseur.execute("SELECT * FROM utilisateurs")
         return curseur.fetchall()
 
-def liste_services(conn):
-    """Retourne la liste complète des utilisateurs."""
-    with conn.get_curseur() as curseur:
-        curseur.execute("""
-            SELECT * FROM services
-        """)
-        return curseur.fetchall()
 
 def ajouter_utilisateurs(conn, courriel, mot_de_passe, nom, prenom):
-    """"""
+    """Ajoute un nouvel utilisateur"""
     with conn.get_curseur() as curseur:
-        curseur.execute("""INSERT INTO utilisateurs (courriel, mot_de_passe, nom, prenom, credit)
-        VALUES (%s, %s, %s, %s, 0) """, (courriel, mot_de_passe, nom, prenom),)     
+        curseur.execute("""
+            INSERT INTO utilisateurs (courriel, mot_de_passe, nom, prenom, credit)
+            VALUES (%s, %s, %s, %s, 0)
+        """, (courriel, mot_de_passe, nom, prenom))
 
-def supprimer_service(connexion, id_service, id_utilisateur):
-    """
-    Supprime un service seulement si :
-    - il appartient à l'utilisateur
-    - il n'a pas encore été réservé 
-    Retourne True si la suppression a réussi, False sinon.
-    """
-    try:
-        with connexion.cursor(dictionary=True) as curseur:
-            requete = """
-                
-                )
-            """
-            curseur.execute(requete, (id_service, id_utilisateur))
-            connexion.commit()
-            return curseur.rowcount > 0
-    except Exception as e:
-        print(e) 
-def supprimer_service(conn, id_service, id_proprietaire):
-    """Supprime un service seulement si :il appartient à l'utilisateur, il n'a pas encore été réservé. Retourne True si la suppression a réussi, False sinon."""
+
+def supprimer_utilisateur(conn, id_utilisateur):
+    """Supprime un utilisateur"""
     with conn.get_curseur() as curseur:
-        curseur.execute(""" DELETE FROM services WHERE id_service = %s AND id_proprietaire = %s AND id_service NOT IN
-         (SELECT id_service FROM reservations)""", (id_service, id_proprietaire))
+        curseur.execute("DELETE FROM utilisateurs WHERE id_utilisateur = %s", (id_utilisateur,))
+
+
+
+def obtenir_services_recents(conn, limit=5):
+    """Retourne les derniers services actifs"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT s.id_service, s.titre, s.localisation, c.nom_categorie
+            FROM services s
+            JOIN categories c ON s.id_categorie = c.id_categorie
+            WHERE s.actif = 1
+            ORDER BY s.date_creation DESC
+            LIMIT %s
+        """, (limit,))
+        return curseur.fetchall()
+
+
+def obtenir_details_service(conn, id_service):
+    """Retourne les détails d’un service"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT s.id_service, s.titre, s.description, s.localisation,
+                   s.date_creation, s.actif, s.cout, s.photo,
+                   c.nom_categorie AS categorie
+            FROM services s
+            JOIN categories c ON s.id_categorie = c.id_categorie
+            WHERE s.id_service = %s
+        """, (id_service,))
+        return curseur.fetchone()
+
+
+def obtenir_categories(conn):
+    """Retourne toutes les catégories"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("SELECT id_categorie, nom_categorie FROM categories")
+        return curseur.fetchall()
+
+
+def inserer_service(conn, titre, localisation, description, cout, actif, photo, categorie, id_proprietaire):
+    """Ajoute un nouveau service"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            INSERT INTO services (titre, localisation, description, cout, actif, photo, id_categorie, id_proprietaire)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (titre, localisation, description, cout, actif, photo, categorie, id_proprietaire))
+
+
+def obtenir_service_par_id(conn, id_service):
+    """Retourne un service par son identifiant"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT s.id_service, s.titre, s.description, s.localisation, s.date_creation,
+                   s.cout, s.actif, s.photo, c.nom_categorie
+            FROM services s
+            JOIN categories c ON s.id_categorie = c.id_categorie
+            WHERE s.id_service = %s
+        """, (id_service,))
+        return curseur.fetchone()
+
+
+def mettre_a_jour_service(conn, id_service, titre, localisation, description, cout, actif, photo):
+    """Met à jour un service existant"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            UPDATE services
+            SET titre=%s, localisation=%s, description=%s, cout=%s, actif=%s, photo=%s
+            WHERE id_service=%s
+        """, (titre, localisation, description, cout, actif, photo, id_service))
+
+
+def obtenir_tous_les_services(conn):
+    """Retourne la liste complète des services"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT s.id_service, s.titre, s.description, s.localisation,
+                   s.photo, s.id_proprietaire, s.actif, s.cout,
+                   c.nom_categorie
+            FROM services s
+            JOIN categories c ON s.id_categorie = c.id_categorie
+            ORDER BY s.date_creation DESC
+        """)
+        return curseur.fetchall()
+
+
+def supprimer_service(conn, id_service, id_proprietaire):
+    """Supprime un service appartenant à un utilisateur, s’il n’est pas réservé"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            DELETE FROM services
+            WHERE id_service = %s
+              AND id_proprietaire = %s
+              AND id_service NOT IN (SELECT id_service FROM reservations)
+        """, (id_service, id_proprietaire))
         conn.commit()
         return curseur.rowcount > 0
-def supprimer_utilisateur(conn, id_utilisateur):
-    """Supprimer un utilisateur. """
-    with conn.get_curseur() as curseur:
-        curseur.execute(
-            "DELETE FROM utilisateurs WHERE id_utilisateur = %s",
-            (id_utilisateur,)
-        )
-def verifier_disponibilite(conn,id_service, date_reservation, heure_reservation):
-    """Vérifie si le service est libre à ce moment-là."""
+
+
+
+def verifier_disponibilite(conn, id_service, date_reservation, heure_reservation):
+    """Vérifie si un service est disponible à une date/heure donnée"""
     with conn.get_curseur() as curseur:
         curseur.execute("""
             SELECT COUNT(*) AS total
             FROM reservations
             WHERE id_service = %s
-            AND date_reservation = %s
-            AND heure_reservation = %s
+              AND date_reservation = %s
+              AND heure_reservation = %s
         """, (id_service, date_reservation, heure_reservation))
         resultat = curseur.fetchone()
         return resultat["total"] == 0
-def chercher_service_par_id(conn, id_service):
-    with conn.get_curseur() as curseur:
-        curseur.execute("SELECT * FROM services WHERE id_service = %s", (id_service,))
-        return curseur.fetchone()
+
+

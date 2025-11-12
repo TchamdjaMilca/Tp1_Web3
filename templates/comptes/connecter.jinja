@@ -1,20 +1,31 @@
-
 {% extends "base.jinja" %}
 
 {% block contenu %}
-  <h2>Connexion</h2>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h2 class="card-title text-center mb-4">Connexion</h2>
 
-  <form method="POST" action="{{ url_for('comptes.connexion') }}" novalidate="novalidate">
-    <div>
-      <label for="courriel">Courriel :</label>
-      <input type="email" name="courriel" id="courriel" required>
+            <form method="POST" action="{{ url_for('comptes.connexion') }}" novalidate>
+              <div class="mb-3">
+                <label for="courriel" class="form-label">Courriel</label>
+                <input type="email" name="courriel" id="courriel" class="form-control" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="mot_de_passe" class="form-label">Mot de passe</label>
+                <input type="password" name="mot_de_passe" id="mot_de_passe" class="form-control" required>
+              </div>
+
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Se connecter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div>
-      <label for="mot_de_passe">Mot de passe :</label>
-      <input type="password" name="mot_de_passe" id="mot_de_passe" required>
-    </div>
-
-    <button type="submit">Se connecter</button>
-  </form>
+  </div>
 {% endblock %}

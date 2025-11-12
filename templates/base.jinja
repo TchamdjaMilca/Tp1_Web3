@@ -1,72 +1,73 @@
-
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-    <title>{%block title%}Accueil{% endblock%}| Mon super site</title>
+    <title>{% block title %}Accueil{% endblock %} | Mon super site</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="https://www.cegepgarneau.ca/favicon.ico" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{url_for ('static', filename ='css/styles.css')}}" />
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
 <body>
     <header>
         <div class="container">
             <h1>
-                <a href="/" class="text-decoration-none text-dark">Mon super site</a>
+                <a href="{{ url_for('index') }}" class="text-decoration-none text-dark">Mon super site</a>
             </h1>
 
+            <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom border-dark-subtle">
+                <div class="container-fluid justify-content-center">
+                    <ul class="nav nav-underline">
 
-            <nav class="navbar navbar-expand-lg bg-body-tertiary  border-bottom border-dark-subtle">
-                <div class="container-fluid justify-content-center ">
-                    <ul class="nav nav-underline  ">
                         <li class="nav-item">
-                            <a class="nav-link {% block active_accueil %}{% endblock %}" href="/">Accueil</a>
+                            <a class="nav-link {% block active_accueil %}{% endblock %}" href="{{ url_for('index') }}">Accueil</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% block active_ajout %}{% endblock %}" href="/ajout">Ajouter service</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% block active_liste %}{% endblock %}" href="/liste">Liste services </a>
-                        </li>
-                         <li class="nav-item">
-                            <a class="nav-link {% block active_compte %}{% endblock %}" href="{{ url_for('comptes.connexion') }}">Se connecter</a>
 
+                        <li class="nav-item">
+                            <a class="nav-link {% block active_ajout %}{% endblock %}" href="{{ url_for('services.ajouter_service') }}">Ajouter service</a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link {% block active_liste %}{% endblock %}" href="{{ url_for('services.liste') }}">Liste services</a>
+                        </li>
+
+                        {% if session.get('nom') %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('comptes.deconnexion') }}">
+                                    Se déconnecter ({{ session.get('nom') }})
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('comptes.connexion') }}">Se connecter</a>
+                            </li>
+                        {% endif %}
+
+
                     </ul>
                 </div>
 
+              
                 <div class="d-flex ms-3">
-                    <a href="/choisir_langue?langue=fr_CA"
-                        class="btn btn-outline-primary btn-sm {% if langue=='fr_CA' %}active{% endif %} me-1">FR</a>
-                    <a href="/choisir_langue?langue=en_CA"
-                        class="btn btn-outline-primary btn-sm {% if langue=='en_CA' %}active{% endif %} me-1">EN
-                        (CA)</a>
-                    <a href="/choisir_langue?langue=en_US"
-                        class="btn btn-outline-primary btn-sm {% if langue=='en_US' %}active{% endif %}">EN (US)</a>
+                    <a href="{{ url_for('choisir_langue', langue='fr_CA') }}"
+                       class="btn btn-outline-primary btn-sm {% if langue == 'fr_CA' %}active{% endif %} me-1">FR</a>
+                    <a href="{{ url_for('choisir_langue', langue='en_CA') }}"
+                       class="btn btn-outline-primary btn-sm {% if langue == 'en_CA' %}active{% endif %} me-1">EN (CA)</a>
+                    <a href="{{ url_for('choisir_langue', langue='en_US') }}"
+                       class="btn btn-outline-primary btn-sm {% if langue == 'en_US' %}active{% endif %}">EN (US)</a>
                 </div>
             </nav>
         </div>
     </header>
 
-
-
-    <main>
+    <main class="container mt-4">
         {% block contenu %}
-        {# <ul>
-            <li></li>
-        </ul> #}
         {% endblock %}
-
     </main>
+
     <footer class="text-center mt-4 py-3 border-top">
         <p>Tchamdja Milca &copy; 2025</p>
     </footer>
-
-
 </body>
-
 </html>
