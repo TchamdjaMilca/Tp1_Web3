@@ -12,6 +12,7 @@ def connexion():
     """Permet à l'utilisateur de se connecter"""
     courriel = ""
     mdp_brut = ""
+    mdp_hache = ""
     erreur = {}
 
     if request.method == 'POST':
@@ -32,6 +33,7 @@ def connexion():
                     utilisateur = bd.chercher_utilisateur(conn, courriel, mdp_hache)
 
                     if utilisateur:
+                        session["id_utilisateur"] = utilisateur["id_utilisateur"]   
                         session["utilisateur"] = utilisateur["courriel"]
                         session["nom"] = utilisateur["nom"]
                         session["est_admin"] = utilisateur["est_admin"]
@@ -43,7 +45,7 @@ def connexion():
                            return render_template('comptes/utilisateur.jinja', utilisateur=utilisateur)
 
                     else:
-                        flash("Courriel ou mot de passe incorrect.")
+                        flash("Courriel ou mot de passe incorrect.","error")
             except Exception as e:
                 app.logger.exception("Erreur BD lors de l'authentification: %s", e)
                 flash("Erreur serveur. Réessayez plus tard.")
