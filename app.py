@@ -199,6 +199,7 @@ def ajouter_service():
             categorie=categorie), 500
 
 
+
 @app.route('/confirmation')
 def redirection_confirmation():
     """Redirection après l'ajout d'un service"""

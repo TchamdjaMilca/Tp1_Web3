@@ -10,7 +10,7 @@ def afficher_liste_services():
    """"""
    with bd.creer_connexion() as connexion:
                 services = bd.liste_services(connexion)
-                return render_template("services/liste.jinja", services = services)
+                return redirect(url_for("liste_service"))
 @bp_service.route("/supprimer/<int:id_service>")
 def supprimmer_service(id_service):
     """Permet à un utilisateur de supprimer un service qu'il a ajouté et non réservé"""
