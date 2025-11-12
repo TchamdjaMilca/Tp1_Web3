@@ -14,7 +14,7 @@
 
         <div class="mb-3">
             <label for="prenom" class="form-label">Prénom</label>
-            <input type="text" class="form-control" id="prenom" name="prenom" value="{{prenom}}">
+            <input type="text" class="form-control" id="prenom" name="prenom" value="{{prenom}}" novalidate>
              {% for category, message in messages %}
             {% if category == 'prenom' %}
             <div class="error alert alert-danger">{{ message }}</div>
@@ -24,7 +24,7 @@
        
         <div class="mb-3">
             <label for="nom" class="form-label">Nom</label>
-            <input type="text" class="form-control" id="nom" value="{{nom}}" name="nom" >
+            <input type="text" class="form-control" id="nom" value="{{nom}}" name="nom" novalidate>
              {% for category, message in messages %}
             {% if category == 'nom' %}
             <div class="error alert alert-danger">{{ message }}</div>
@@ -33,7 +33,7 @@
         </div>
         <div class="mb-3">
             <label for="courriel" class="form-label">Courriel</label>
-            <input type="email" class="form-control" id="courriel" value="{{courriel}}" name="courriel" >
+            <input type="email" class="form-control" id="courriel" value="{{courriel}}" name="courriel" novalidate>
              {% for category, message in messages %}
             {% if category == 'courriel' %}
             <div class="error alert alert-danger">{{ message }}</div>
@@ -44,7 +44,7 @@
 
         <div class="mb-3">
             <label for="mot_de_passe" class="form-label">Mot de passe</label>
-            <input type="password" class="form-control" id="mot_de_passe" value="{{mot_de_passe}}" name="mot_de_passe" >
+            <input type="password" class="form-control" id="mot_de_passe" value="{{mot_de_passe}}" name="mot_de_passe" novalidate>
              {% for category, message in messages %}
             {% if category == 'mot_de_passe' %}
             <div class="error alert alert-danger">{{ message }}</div>
