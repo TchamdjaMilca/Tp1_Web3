@@ -20,7 +20,6 @@ def connexion():
 
         app.logger.info("Début d'authentification pour %s", courriel)
 
-        # Validation des champs
         if not courriel:
             erreur["courriel"] = "Le courriel est invalide."
         if not mdp_brut:
@@ -28,7 +27,6 @@ def connexion():
 
         if not erreur:
             mdp_hache = hacher_mdp(mdp_brut)
-            print("DEBUG login:", courriel, mdp_hache)
             try:
                 with bd.creer_connexion() as conn:
                     utilisateur = bd.chercher_utilisateur(conn, courriel, mdp_hache)
@@ -39,7 +37,6 @@ def connexion():
                         session["est_admin"] = utilisateur["est_admin"]
 
                         flash(f"Bienvenue {utilisateur['nom']} !")
-                        print (utilisateur["est_admin"], "allo")
                         if utilisateur["est_admin"]:
                             return render_template('comptes/admin.jinja', utilisateur=utilisateur)
                         else: 
@@ -66,18 +63,17 @@ def liste_utilisateurs():
                 utilisateurs = bd.liste_utilisateurs(connexion)
                 print(utilisateurs)
                 return render_template("comptes/liste_utilisateurs.jinja", utilisateurs = utilisateurs)
-
-@bp_compte.route('/deconnecter', methods=['GET'])
-def deconnecter():
-    """deconnecter"""
-    if "utilisateur" in session:
-        nom = session.get("nom") or session.get("utilisateur")
-        session.clear()
-        flash(f"{nom} a été déconnecté avec succès.")
+@bp_compte.route('/deconnexion')
+def deconnexion():
+    """Déconnecte l'utilisateur"""
+    nom = session.get("nom")
+    session.clear()
+    if nom:
+        flash(f"{nom} a été déconnecté avec succès.", "info")
     else:
-        flash("Aucun utilisateur n'était connecté.")
+        flash("Aucun utilisateur n'était connecté.", "warning")
+    return redirect(url_for('index'))
 
-    return redirect("/") 
 
 @bp_compte.route("/form_ajout_compter")
 def form_ajout_compter():
