@@ -12,7 +12,7 @@ def connexion():
     """Permet à l'utilisateur de se connecter"""
     courriel = ""
     mdp_brut = ""
-    mdp_hache = ""
+    
     erreur = {}
 
     if request.method == 'POST':
@@ -22,9 +22,12 @@ def connexion():
         app.logger.info("Début d'authentification pour %s", courriel)
 
         if not courriel:
-            erreur["courriel"] = "Le courriel est invalide."
+            erreur["courriel"] = "Veuillez entrer votre courriel."
+        elif not re.match(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$', courriel):
+            erreur["courriel"] = "Le courriel n’est pas valide."
+
         if not mdp_brut:
-            erreur["mot_de_passe"] = "Le mot de passe est invalide."
+          erreur["mot_de_passe"] = "Veuillez entrer votre mot de passe."
 
         if not erreur:
             mdp_hache = hacher_mdp(mdp_brut)
@@ -40,20 +43,14 @@ def connexion():
 
                         flash(f"Bienvenue {utilisateur['nom']} !")
                         if utilisateur["est_admin"]:
-                            return render_template('comptes/admin.jinja', utilisateur=utilisateur)
-                        else: 
-                           return render_template('comptes/utilisateur.jinja', utilisateur=utilisateur)
-
+                         return render_template('comptes/admin.jinja', utilisateur=utilisateur)
+                        else:
+                            return render_template('comptes/utilisateur.jinja', utilisateur=utilisateur)
                     else:
                         flash("Courriel ou mot de passe incorrect.","error")
             except Exception as e:
                 app.logger.exception("Erreur BD lors de l'authentification: %s", e)
                 flash("Erreur serveur. Réessayez plus tard.")
-        else:
-           
-            for champ, message in erreur.items():
-                print(f"Erreur dans {champ}: {message}")
-
     return render_template('comptes/connecter.jinja', erreur=erreur, courriel=courriel)
 
 bp_service = Blueprint('services', __name__)
@@ -74,7 +71,8 @@ def deconnexion():
         flash(f"{nom} a été déconnecté avec succès.", "info")
     else:
         flash("Aucun utilisateur n'était connecté.", "warning")
-    return redirect(url_for('index'))
+    return redirect(url_for('services.liste'))
+
 
 
 @bp_compte.route("/form_ajout_compter")
