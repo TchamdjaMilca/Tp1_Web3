@@ -1,0 +1,51 @@
+{% extends "base.jinja" %}
+
+{% block title %}Confirmation de la réservation{% endblock %}
+
+{% block contenu %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm border-success">
+        <div class="card-body text-center">
+          <h2 class="text-success mb-3">
+            <i class="bi bi-check-circle-fill"></i> Réservation confirmée !
+          </h2>
+
+          <p class="lead">Votre réservation a été enregistrée avec succès.</p>
+
+          <div class="mt-4 text-start">
+            <h5>Détails de la réservation :</h5>
+            <ul class="list-group">
+              <li class="list-group-item">
+                <strong>Service :</strong> {{ service.titre }}
+              </li>
+              <li class="list-group-item">
+                <strong>Description :</strong> {{ service.description }}
+              </li>
+              <li class="list-group-item">
+                <strong>Prestataire :</strong> {{ service.nom_proprietaire if service.nom_proprietaire else "Non spécifié" }}
+              </li>
+              <li class="list-group-item">
+                <strong>Date et heure :</strong> {{ date_heure_reservation }}
+              </li>
+              <li class="list-group-item">
+                <strong>Coût :</strong> {{ service.cout }} crédits
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-4">
+            <a href="{{ url_for('services.liste') }}" class="btn btn-outline-primary me-2">
+              <i class="bi bi-arrow-left"></i> Retour aux services
+            </a>
+            <a href="{{ url_for('comptes.deconnexion') }}" class="btn btn-outline-danger">
+              <i class="bi bi-box-arrow-right"></i> Déconnexion
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,36 +1,55 @@
-from flask import Blueprint,  render_template, request, redirect,abort,flash
-
+from flask import Blueprint, render_template, request, redirect, abort, flash, current_app as app, session, url_for
 import bd
 
 bp_reservation = Blueprint('reservation', __name__)
 
-@bp_reservation.route('/reservation', methods=['GET'])
-def reservation():
-    """deconnecter"""
-    return render_template("reservation/reservation.jinja")
+@bp_reservation.route("/services/reserver/<int:id_service>", methods=["GET", "POST"])
+def reserver_service(id_service):
+    """Permet à un utilisateur authentifié de réserver un service"""
 
-@bp_reservation.route("/services/reserver", methods=["GET", "POST"])
-def reserver_service():
-    id_service = request.args.get("id", type=int)
-    if not id_service:
-        abort(400, "ID du service manquant")
+    id_utilisateur = session.get("id_utilisateur")
+    if not id_utilisateur:
+        flash("Vous devez être connecté pour réserver un service.", "error")
+        return redirect(url_for("comptes.connexion"))
 
     with bd.creer_connexion() as conn:
-        service = bd.chercher_service_par_id(conn, id_service)
+        service = bd.obtenir_service_par_id(conn, id_service)
         if not service:
-            abort(404, "Service non trouvé")
+            abort(404, "Service introuvable.")
+
+        if service.get("id_proprietaire") == id_utilisateur:
+            flash("Vous ne pouvez pas réserver votre propre service.", "error")
+            return redirect(url_for("services.liste"))
+
+        utilisateur = bd.obtenir_utilisateur_par_id(conn, id_utilisateur)
+        if not utilisateur:
+            flash("Utilisateur non trouvé.", "error")
+            return redirect(url_for("services.liste"))
+
+        if utilisateur["credit"] < service["cout"]:
+            flash("Crédit insuffisant pour réserver ce service.", "error")
+            return render_template("reservation/reservation.jinja", service=service)
 
         if request.method == "POST":
-            date_reservation = request.form.get("date_reservation")
-            heure_reservation = request.form.get("heure_reservation")
+            date_heure_reservation = request.form.get("date_heure_reservation")
 
-            if not date_reservation or not heure_reservation:
-                flash("Choisis une date et une heure.")
-            else:
-                libre = bd.verifier_disponibilite(conn, id_service, date_reservation, heure_reservation)
-                if libre:
-                    flash("Ce créneau est disponible.")
-                else:
-                    flash("Ce créneau est déjà réservé.")
+            if not date_heure_reservation:
+                flash("Veuillez choisir une date et une heure.", "error")
+                return render_template("reservation/reservation.jinja", service=service)
 
+            disponible = bd.verifier_disponibilite(conn, id_service, date_heure_reservation)
+            if not disponible:
+                flash("Ce créneau est déjà réservé.", "error")
+                return render_template("reservation/reservation.jinja", service=service)
+
+            bd.ajouter_reservation(conn, id_utilisateur, id_service, date_heure_reservation)
+
+            bd.mettre_a_jour_credits(conn, id_utilisateur, service["id_proprietaire"], service["cout"])
+
+            flash("Réservation effectuée avec succès !", "success")
+            return render_template(
+                "reservation/confirmation_reservation.jinja",
+                service=service,
+                date_heure_reservation=date_heure_reservation
+            )
     return render_template("reservation/reservation.jinja", service=service)

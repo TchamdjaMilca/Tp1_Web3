@@ -7,47 +7,39 @@
   <h2 class="text-center mb-4">Liste des services</h2>
 
   {% if services %}
-    <div class="row">
-      {% for s in services %}
-        <div class="col-md-4 mb-4">
-          <div class="card text-center mb-3 shadow" style="width: 18rem;">
-            <img src="{{ s.src }}" class="card-img-top" alt="photo du service">
+  <div class="row">
+    {% for s in services %}
+    <div class="col-md-4 mb-4">
+      <div class="card text-center mb-3 shadow" style="width: 18rem;">
+        <img src="{{ s.src }}" class="card-img-top" alt="photo du service">
 
-            <div class="card-body">
-              <h5 class="card-title">{{ s.titre }}</h5>
-              <p class="card-text">{{ s.description }}</p>
-              <p class="card-text"><strong>Localisation:</strong> {{ s.localisation }}</p>
-              <p class="card-text"><strong>Catégorie:</strong> {{ s.nom_categorie }}</p>
-              <p class="card-text"><strong>Coût:</strong> {{ s.cout }} $</p>
+        <div class="card-body">
+          <h5 class="card-title">{{ s.titre }}</h5>
+          <p class="card-text">{{ s.description }}</p>
+          <p class="card-text"><strong>Localisation:</strong> {{ s.localisation }}</p>
+          <p class="card-text"><strong>Catégorie:</strong> {{ s.nom_categorie }}</p>
+          <p class="card-text"><strong>Coût:</strong> {{ s.cout }} crédits</p>
 
-              {% if session.get("id_utilisateur") == 1 %}
-                
-                <a href="{{ url_for('services.modifier_service', id_service=s.id_service) }}" 
-                   class="btn btn-warning w-100 mt-2">Modifier</a>
+          {% if session.get("id_utilisateur") %}
+            
+            {% if s.id_proprietaire == session.get("id_utilisateur") %}
+              <a href="{{ url_for('services.modifier_service', id_service=s.id_service) }}"
+                 class="btn btn-warning w-100 mt-2">Modifier</a>
 
-                <a href="{{ url_for('services.supprimmer_service', id_service=s.id_service) }}"
-                   class="btn btn-danger w-100 mt-2">Supprimer</a>
+              <a href="{{ url_for('services.supprimmer_service', id_service=s.id_service) }}"
+                 class="btn btn-danger w-100 mt-2">Supprimer</a>
 
-              {% elif session.get("id_utilisateur") %}
-                {% if s.id_proprietaire == session.get("id_utilisateur") %}
+            {% elif s.actif %}
+              <a href="{{ url_for('reservation.reserver_service', id_service=s.id_service) }}"
+                 class="btn btn-primary w-100 mt-2">Réserver</a>
+            {% endif %}
 
-                  <a href="{{ url_for('services.modifier_service', id_service=s.id_service) }}" 
-                     class="btn btn-warning w-100 mt-2">Modifier</a>
-
-                  <a href="{{ url_for('services.supprimmer_service', id_service=s.id_service) }}" 
-                     class="btn btn-danger w-100 mt-2">Supprimer</a>
-
-                {% elif s.actif %}
-                  <a href="{{ url_for('reservation.reserver_service', id_service=s.id_service) }}" 
-                     class="btn btn-primary w-100 mt-2">Réserver</a>
-                {% endif %}
-              {% endif %}
-
-            </div>
-          </div>
+          {% endif %}
         </div>
-      {% endfor %}
+      </div>
     </div>
+    {% endfor %}
+  </div>
   {% else %}
     <p>Aucun service n’a été ajouté pour le moment.</p>
   {% endif %}

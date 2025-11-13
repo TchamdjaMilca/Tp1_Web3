@@ -1,32 +1,54 @@
 {% extends "base.jinja" %}
-{% block title %}Réservation{% endblock %}
+
+{% block title %}Réservation - {{ service.titre }}{% endblock %}
+
 {% block contenu %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">Réserver le service</h3>
 
-<div class="container mt-4">
-  <h2 class="text-center mb-4">Réserver le service</h2>
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category in ['error', 'danger'] else category }} text-center">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
 
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="card-title">{{ service.titre }}</h5>
-      <p><strong>Description :</strong> {{ service.description }}</p>
-      <p><strong>Localisation :</strong> {{ service.localisation }}</p>
-      <p><strong>Coût :</strong> {{ service.cout }} $</p>
+          <p><strong>Service :</strong> {{ service.titre }}</p>
+          <p><strong>Description :</strong> {{ service.description }}</p>
+          <p><strong>Coût :</strong> {{ service.cout }} crédits</p>
+
+          <form method="POST" action="{{ url_for('reservation.reserver_service', id_service=service.id_service) }}">
+            <div class="mb-3">
+              <label for="date_heure_reservation" class="form-label">Date et heure souhaitées :</label>
+              <input 
+                type="datetime-local" 
+                id="date_heure_reservation" 
+                name="date_heure_reservation" 
+                class="form-control" 
+                required
+              >
+            </div>
+
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary">Confirmer la réservation</button>
+            </div>
+          </form>
+
+          <div class="mt-4 text-center">
+            <a href="{{ url_for('services.liste') }}" class="btn btn-outline-secondary btn-sm">
+              Retour à la liste
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <form method="POST" class="border p-4 rounded bg-light">
-    <div class="mb-3">
-      <label for="date_reservation" class="form-label">Date</label>
-      <input type="date" id="date_reservation" name="date_reservation" class="form-control" required>
-    </div>
-
-    <div class="mb-3">
-      <label for="heure_reservation" class="form-label">Heure</label>
-      <input type="time" id="heure_reservation" name="heure_reservation" class="form-control" required>
-    </div>
-
-    <button type="submit" class="btn btn-primary w-100">Vérifier la disponibilité</button>
-  </form>
 </div>
-
 {% endblock %}

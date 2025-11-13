@@ -126,12 +126,13 @@ def obtenir_service_par_id(conn, id_service):
     with conn.get_curseur() as curseur:
         curseur.execute("""
             SELECT s.id_service, s.titre, s.description, s.localisation, s.date_creation,
-                   s.cout, s.actif, s.photo, c.nom_categorie
+                   s.cout, s.actif, s.photo, s.id_proprietaire, c.nom_categorie
             FROM services s
             JOIN categories c ON s.id_categorie = c.id_categorie
             WHERE s.id_service = %s
         """, (id_service,))
         return curseur.fetchone()
+
 
 
 def mettre_a_jour_service(conn, id_service, titre, localisation, description, cout, actif, photo):
@@ -172,17 +173,56 @@ def supprimer_service(conn, id_service, id_proprietaire):
 
 
 
-def verifier_disponibilite(conn, id_service, date_reservation, heure_reservation):
-    """Vérifie si un service est disponible à une date/heure donnée"""
+# dTef verifier_disponibilite(conn, id_service, date_reservation, heure_reservation):
+#     """Vérifie si un service est disponible à une date/heure donnée"""
+#     with conn.get_curseur() as curseur:
+#         curseur.execute("""
+#             SELEC COUNT(*) AS total
+#             FROM reservations
+#             WHERE id_service = %s
+#               AND date_reservation = %s
+#               AND heure_reservation = %s
+#         """, (id_service, date_reservation, heure_reservation))
+#         resultat = curseur.fetchone()
+#         return resultat["total"] == 0
+
+def ajouter_reservation(conn, id_utilisateur, id_service, date_heure_reservation):
+    """Ajoute une réservation dans la BD"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            INSERT INTO reservations (id_utilisateur, id_service, date_heure_reservation)
+            VALUES (%s, %s, %s)
+        """, (id_utilisateur, id_service, date_heure_reservation))
+
+
+def verifier_disponibilite(conn, id_service, date_heure_reservation):
+    """Vérifie si un créneau est libre pour un service"""
     with conn.get_curseur() as curseur:
         curseur.execute("""
             SELECT COUNT(*) AS total
             FROM reservations
-            WHERE id_service = %s
-              AND date_reservation = %s
-              AND heure_reservation = %s
-        """, (id_service, date_reservation, heure_reservation))
+            WHERE id_service = %s AND date_heure_reservation = %s
+        """, (id_service, date_heure_reservation))
+        return curseur.fetchone()["total"] == 0
+
+def obtenir_utilisateur_par_id(conn, id_utilisateur):
+    """Retourne les infos d’un utilisateur selon son ID"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("SELECT * FROM utilisateurs WHERE id_utilisateur = %s", (id_utilisateur,))
+        return curseur.fetchone()
+
+
+def obtenir_credit_utilisateur(conn, id_utilisateur):
+    """Retourne le crédit actuel d'un utilisateur"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("SELECT credit FROM utilisateurs WHERE id_utilisateur = %s", (id_utilisateur,))
         resultat = curseur.fetchone()
-        return resultat["total"] == 0
+        return resultat["credit"] if resultat else 0
 
-
+def mettre_a_jour_credits(conn, id_client, id_proprietaire, cout_service):
+    """Met à jour les crédits après une réservation"""
+    with conn.get_curseur() as curseur:
+        curseur.execute("UPDATE utilisateurs SET credit = credit - %s WHERE id_utilisateur = %s",
+                        (cout_service, id_client))
+        curseur.execute("UPDATE utilisateurs SET credit = credit + %s WHERE id_utilisateur = %s",
+                        (cout_service, id_proprietaire))
