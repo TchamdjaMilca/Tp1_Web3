@@ -11,7 +11,7 @@
     {% for s in services %}
     <div class="col-md-4 mb-4">
       <div class="card text-center mb-3 shadow" style="width: 18rem;">
-        <img src="{{ s.src }}" class="card-img-top" alt="photo du service">
+        <img src="/static/images/{{ s.photo }}" class="card-img-top" alt="photo du service">
 
         <div class="card-body">
           <h5 class="card-title">{{ s.titre }}</h5>

@@ -81,7 +81,7 @@ def obtenir_services_recents(conn, limit=5):
     """Retourne les derniers services actifs"""
     with conn.get_curseur() as curseur:
         curseur.execute("""
-            SELECT s.id_service, s.titre, s.localisation, c.nom_categorie
+            SELECT *
             FROM services s
             JOIN categories c ON s.id_categorie = c.id_categorie
             WHERE s.actif = 1
@@ -125,8 +125,7 @@ def obtenir_service_par_id(conn, id_service):
     """Retourne un service par son identifiant"""
     with conn.get_curseur() as curseur:
         curseur.execute("""
-            SELECT s.id_service, s.titre, s.description, s.localisation, s.date_creation,
-                   s.cout, s.actif, s.photo, s.id_proprietaire, c.nom_categorie
+            SELECT *
             FROM services s
             JOIN categories c ON s.id_categorie = c.id_categorie
             WHERE s.id_service = %s
@@ -135,14 +134,22 @@ def obtenir_service_par_id(conn, id_service):
 
 
 
-def mettre_a_jour_service(conn, id_service, titre, localisation, description, cout, actif, photo):
+def mettre_a_jour_service(conn, id_service, titre, localisation, description, cout, actif, photo, id_categorie):
     """Met à jour un service existant"""
     with conn.get_curseur() as curseur:
         curseur.execute("""
             UPDATE services
-            SET titre=%s, localisation=%s, description=%s, cout=%s, actif=%s, photo=%s
+            SET titre=%s,
+                localisation=%s,
+                description=%s,
+                cout=%s,
+                actif=%s,
+                photo=%s,
+                id_categorie=%s
             WHERE id_service=%s
-        """, (titre, localisation, description, cout, actif, photo, id_service))
+        """, (titre, localisation, description, cout, actif, photo, id_categorie, id_service))
+    conn.commit()
+
 
 
 def obtenir_tous_les_services(conn):
@@ -226,3 +233,11 @@ def mettre_a_jour_credits(conn, id_client, id_proprietaire, cout_service):
                         (cout_service, id_client))
         curseur.execute("UPDATE utilisateurs SET credit = credit + %s WHERE id_utilisateur = %s",
                         (cout_service, id_proprietaire))
+        
+def donner_credit_pour_ajout_service(conn, id_utilisateur, montant=20):
+    """Donne du crédit à un utilisateur pour l'ajout d'un service"""
+    with conn.get_curseur() as curseur:
+        curseur.execute(
+            "UPDATE utilisateurs SET credit = credit + %s WHERE id_utilisateur = %s",
+            (montant, id_utilisateur)
+        )

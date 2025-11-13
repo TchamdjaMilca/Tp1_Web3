@@ -7,7 +7,7 @@ Template pour l'index
         <div class="card text-center">
              <div class="card-header">
                 {% if service.photo%}
-                    <img src="static/images/img2.jpg" class="card-img p-2" width="400" height="600" alt="Image par défaut">
+                    <img src="/static/images/{{ service.photo }}" class="card-img p-2" width="400" height="600" alt="Image par défaut">
                 {% endif %}
              </div>
              <div class="card-body">
@@ -15,7 +15,7 @@ Template pour l'index
                 <p class="card-text"><strong>Description: </strong>{{service.description}}</p>
                 <p class="card-text"><strong>Localisation: </strong>{{service.localisation}}</p>
                 <p class="card-text"><strong>Date de création: </strong>{{date_du_jour}}</p>
-                <p class="card-text"><strong>Coût: </strong>{{prix_exemple}} </p>
+                <p class="card-text"><strong>Coût: </strong>{{service.cout}} </p>
                 <p class="card-text"><strong>Categorie: </strong>{{service.categorie}}</p>
                 <p class="card-text"><strong>Actif: </strong>
                     {% if service.actif%}
@@ -24,7 +24,7 @@ Template pour l'index
                         Inactif
                     {% endif %}
                 </p>
-                <a href="modifier?id={{ service.id_service }}" class="btn btn-primary">Modifier service</a>
+                <a href="{{ url_for('services.modifier_service', id_service=service.id_service) }}" class="btn btn-primary">Modifier service</a>
              </div>
              <div class="card-footer text-body-secondary">
                  Dernière mise à jour : {{ service.date_creation }}

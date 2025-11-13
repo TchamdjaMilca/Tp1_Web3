@@ -3,6 +3,7 @@ from flask import Blueprint,  render_template, request, redirect,flash,session,u
 import bd
 import os
 import re
+from utilitaires import valider_service
 bp_service = Blueprint('services', __name__)
 
 
@@ -15,11 +16,6 @@ def liste():
     except Exception as e:
         app.logger.error(f"Erreur BD dans /liste : {e}")
         abort(500, "Erreur de connexion à la base de données")
-
-    for service in services:
-        if service.get("photo"):
-            service["src"] = f"/{app.config['ROUTE_VERS_IMAGES']}/{service['photo']}"
-
     return render_template('services/liste.jinja', services=services)
 
 
@@ -88,7 +84,8 @@ def ajouter_service():
                     chemin_complet = os.path.join(app.config['CHEMIN_VERS_IMAGES'], photo.filename)
                     photo.save(chemin_complet)
                     bd.inserer_service(conn, titre, localisation, description, cout, statut, photo.filename, categorie, id_proprietaire)
-                    return redirect('/confirmation', code=303)
+                    bd.donner_credit_pour_ajout_service(conn, id_proprietaire)
+                    return redirect(url_for('services.confirmation', code=303))
 
             return render_template('services/ajout.jinja',
                                    categories=categories,
@@ -106,7 +103,6 @@ def ajouter_service():
                                    class_photo=class_photo)
     except Exception as e:
         abort(500, f"Erreur BD : {e}")
-
 
 @bp_service.route('/modifier/<int:id_service>', methods=['GET', 'POST'])
 def modifier_service(id_service):

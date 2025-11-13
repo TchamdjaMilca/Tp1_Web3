@@ -7,6 +7,11 @@ import re
 
 bp_compte= Blueprint('comptes', __name__)
 
+@bp_compte.route('Espace_utilisateur')
+def Espace_utilisateur():
+    """Page d'accueil : affiche les 5 derniers services"""
+    return render_template('comptes/utilisateur.jinja')
+
 @bp_compte.route('/connexion', methods=['GET', 'POST'])
 def connexion():
     """Permet à l'utilisateur de se connecter"""
@@ -57,7 +62,7 @@ bp_service = Blueprint('services', __name__)
 
 @bp_compte.route("/liste_utilisateurs")
 def liste_utilisateurs():
-   """helos"""
+   """Affiche la liste des utilisateurs"""
    with bd.creer_connexion() as connexion:
                 utilisateurs = bd.liste_utilisateurs(connexion)
                 print(utilisateurs)
@@ -77,9 +82,11 @@ def deconnexion():
 
 @bp_compte.route("/form_ajout_compter")
 def form_ajout_compter():
+   """Affiche le formulaire d'ajout de compte"""
    return render_template("comptes/ajout_compte.jinja")
 @bp_compte.route("/ajouter_compte", methods=["GET", "POST"])
 def ajouter_compte():
+    """Permet d’ajouter un compte utilisateur avec validation"""
     if request.method == "POST":
         caracteres_interdits = re.compile('<|>')
         regex_courriel = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'

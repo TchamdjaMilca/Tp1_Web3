@@ -35,6 +35,12 @@
                             <a class="nav-link {% block active_liste %}{% endblock %}"
                                 href="{{ url_for('services.liste') }}">Liste services</a>
                         </li>
+                        {%if 'utilisateur' in session%}
+                        <li class="nav-item">
+                            <a class="nav-link {% block utilisateur %}{% endblock %}"
+                                href="{{ url_for('comptes.Espace_utilisateur') }}">Espace utilisateur</a>
+                        </li>
+                        {% endif %}
 
                         {% if session.get('id_utilisateur') %}
                         <li class="nav-item">
