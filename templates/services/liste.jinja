@@ -21,25 +21,28 @@
               <p class="card-text"><strong>Coût:</strong> {{ s.cout }} $</p>
 
               {% if session.get("id_utilisateur") == 1 %}
-                      <a href="{{ url_for('modifier_service', id=s.id_service) }}" 
-                       class="btn btn-warning w-100 mt-2">Modifier</a>
+                
+                <a href="{{ url_for('services.modifier_service', id_service=s.id_service) }}" 
+                   class="btn btn-warning w-100 mt-2">Modifier</a>
+
                 <a href="{{ url_for('services.supprimmer_service', id_service=s.id_service) }}"
-                   class="btn btn-danger w-100 mt-2">
-                  Supprimer
-                </a>
+                   class="btn btn-danger w-100 mt-2">Supprimer</a>
 
               {% elif session.get("id_utilisateur") %}
-                  {% if s.id_proprietaire  == session.get("id_utilisateur") %}
-                    <a href="{{ url_for('modifier_service', id=s.id_service) }}" 
-                       class="btn btn-warning w-100 mt-2">Modifier</a>
-                    <a href="{{ url_for('services.supprimmer_service', id_service=s.id_service) }}" 
-                       class="btn btn-danger w-100 mt-2">Supprimer</a>
-                  {% elif s.actif %}
-                    <a href="{{ url_for('reservation.reserver_service', id=s.id_service) }}" 
-                       class="btn btn-primary w-100 mt-2">Réserver</a>
-                  {% endif %}
+                {% if s.id_proprietaire == session.get("id_utilisateur") %}
 
+                  <a href="{{ url_for('services.modifier_service', id_service=s.id_service) }}" 
+                     class="btn btn-warning w-100 mt-2">Modifier</a>
+
+                  <a href="{{ url_for('services.supprimmer_service', id_service=s.id_service) }}" 
+                     class="btn btn-danger w-100 mt-2">Supprimer</a>
+
+                {% elif s.actif %}
+                  <a href="{{ url_for('reservation.reserver_service', id_service=s.id_service) }}" 
+                     class="btn btn-primary w-100 mt-2">Réserver</a>
+                {% endif %}
               {% endif %}
+
             </div>
           </div>
         </div>
