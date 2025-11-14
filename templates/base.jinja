@@ -23,7 +23,6 @@
                         <ul class="navbar-nav ms-auto">
 
                             {% if session.get('id_utilisateur') %}
-                            <!-- Liens pour tout utilisateur connecté -->
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('services.ajouter_service') }}">Ajouter service</a>
                             </li>
@@ -36,7 +35,6 @@
                             </li>
 
                             {% if session.get('est_admin') %}
-                            <!-- Liens spécifiques admin -->
                             <li class="nav-item">
                                 <a class="nav-link fw-bold text-danger" href="{{ url_for('comptes.admin') }}">Admin</a>
                             </li>
@@ -46,7 +44,6 @@
                                 <a class="nav-link" href="{{ url_for('comptes.deconnexion') }}">Déconnexion</a>
                             </li>
                             {% else %}
-                            <!-- Liens pour visiteur non connecté -->
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('comptes.connexion') }}">Se connecter</a>
                             </li>

@@ -16,49 +16,45 @@ def Espace_utilisateur():
 @bp_compte.route('/connexion', methods=['GET', 'POST'])
 def connexion():
     courriel = ""
-    mdp_brut = ""
-    erreur = {}
-
+    
     if request.method == 'POST':
         courriel = request.form.get("courriel", "").strip()
         mdp_brut = request.form.get("mot_de_passe", "").strip()
 
-        app.logger.info("Début d'authentification pour %s", courriel)
+        erreur = False 
 
-        if not courriel:
-            erreur["courriel"] = "Veuillez entrer votre courriel."
-        elif not re.match(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$', courriel):
-            erreur["courriel"] = "Courriel invalide."
+        if not courriel or not re.match(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$', courriel):
+            flash("Veuillez entrer un courriel valide.", "error")
+            erreur = True
 
         if not mdp_brut:
-            erreur["mot_de_passe"] = "Veuillez entrer votre mot de passe."
+            flash("Veuillez entrer votre mot de passe.", "error_mdp")
+            erreur = True
 
-        if not erreur:
-            mdp_hache = hacher_mdp(mdp_brut)
-            try:
-                with bd.creer_connexion() as conn:
-                    utilisateur = bd.chercher_utilisateur(conn, courriel, mdp_hache)
-            except Exception as e:
-                app.logger.error(e)
-                abort(500)
+        if erreur:
+            return render_template('comptes/connecter.jinja', courriel=courriel)
 
-            if utilisateur:
-                session["id_utilisateur"] = utilisateur["id_utilisateur"]
-                session["utilisateur"] = utilisateur["courriel"]
-                session["nom"] = utilisateur["nom"]
-                session["est_admin"] = bool(utilisateur["est_admin"])
+        mdp_hache = hacher_mdp(mdp_brut)
 
-                flash(f"Bienvenue {utilisateur['nom']} !")
+        try:
+            with bd.creer_connexion() as conn:
+                utilisateur = bd.chercher_utilisateur(conn, courriel, mdp_hache)
+        except Exception as e:
+            app.logger.error(e)
+            abort(500)
 
-                if utilisateur["est_admin"]:
-                    return render_template('comptes/admin.jinja', utilisateur=utilisateur)
-                else:
-                    return render_template('comptes/utilisateur.jinja', utilisateur=utilisateur)
+        if utilisateur:
+            session["id_utilisateur"] = utilisateur["id_utilisateur"]
+            session["utilisateur"] = utilisateur["courriel"]
+            session["nom"] = utilisateur["nom"]
+            session["est_admin"] = bool(utilisateur["est_admin"])
 
+            if utilisateur["est_admin"]:
+                return render_template('comptes/admin.jinja', utilisateur=utilisateur)
             else:
-                flash("Courriel ou mot de passe incorrect.", "error")
+                return render_template('comptes/utilisateur.jinja', utilisateur=utilisateur)
+    return render_template('comptes/connecter.jinja', courriel=courriel)
 
-    return render_template('comptes/connecter.jinja', erreur=erreur, courriel=courriel)
 
 @bp_compte.route("/liste_utilisateurs")
 def liste_utilisateurs():

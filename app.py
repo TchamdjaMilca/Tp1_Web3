@@ -8,7 +8,6 @@ import os
 from flask import Flask, render_template, request , abort  , redirect , make_response,session
 import re
 import bd
-import logging
 from flask_babel import Babel,numbers, dates
 from flask.logging import create_logger
 from datetime import date
@@ -28,7 +27,8 @@ app.config['CHEMIN_VERS_IMAGES'] = os.path.join(app.root_path, *app.config['MORC
 
 logger = create_logger(app)
  
-app.secret_key = "La clé secrète"
+app.secret_key = "Cette chaîne servira pour l'encryption de la session. \
+                  Elle doit être générée aléatoirement"
 # app.secret_key ="e81ea91a141620d25a70f65c4d02e81d1a5fa7c8a5bc8fa8df6eda83300402ad"
  
 titres = {
@@ -54,58 +54,32 @@ def index():
         abort(500)
     return render_template('index.jinja', services=services)
 
-
-logger = logging.getLogger(__name__)
-
 @app.errorhandler(400)
 def erreur_400(e):
     """Logger erreur 400"""
     logger.warning(f"Erreur 400: {e}")
-    return render_template(
-        'erreur/erreur.jinja',
-        message="Erreur 400 : Requête invalide."
-    ), 400
-
-
+    return render_template('erreur/erreur.jinja', message=f"Erreur 400 : {e}"), 400
+ 
+@app.errorhandler(404)
+def erreur_404(e):
+    """Logger erreur 404"""
+    logger.warning(f"Erreur 404: {e}")
+    return render_template('erreur/erreur.jinja', message=f"Erreur 404 : Page non trouvée ou service inexistant"), 404
 @app.errorhandler(401)
 def erreur_401(e):
     """Affiche une page 401 avec un lien vers la connexion"""
     logger.warning(f"Erreur 401: {e}")
     return render_template(
-        'erreur/erreur.jinja',
-        message="Vous devez être connecté pour accéder à cette page."
+        "erreur/erreur.jinja",
+        message="Vous devez être connecté pour accéder à cette page.",
     ), 401
-
-
-@app.errorhandler(403)
-def erreur_403(e):
-    """Logger erreur 403"""
-    logger.warning(f"Erreur 403: {e}")
-    return render_template(
-        'erreur/erreur.jinja',
-        message="Erreur 403 : Vous n'avez pas la permission pour effectuer cette action."
-    ), 403
-
-
-@app.errorhandler(404)
-def erreur_404(e):
-    """Logger erreur 404"""
-    logger.warning(f"Erreur 404: {e}")
-    return render_template(
-        'erreur/erreur.jinja',
-        message="Erreur 404 : Page, service ou utilisateur inexistant."
-    ), 404
-
-
+ 
+ 
 @app.errorhandler(500)
 def erreur_500(e):
     """Logger erreur 500"""
-    logger.exception(f"Erreur 500: {e}")
-    return render_template(
-        'erreur/erreur.jinja',
-        message="Erreur 500 : Problème serveur ou base de données. Veuillez réessayer plus tard."
-    ), 500
-
+    logger.exception(f"Erreur 500:{e}")
+    return render_template('erreur/erreur.jinja', message=f"Erreur 500 : Problème serveur ou base de données. Veuillez réessayer plus tard"), 500
  
 @app.route('/choisir_langue')
 def choisir_langue():

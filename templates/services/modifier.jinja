@@ -11,25 +11,25 @@
                 
                 <div class="mb-3">
                     <label for="titre" class="form-label fw-bold">Titre</label>
-                    <input type="text" class="form-control {{ class_titre }}" id="titre" name="titre" required value="{{ service.titre }}">
+                    <input type="text" class="form-control {{ class_titre }}" id="titre" name="titre"  value="{{ service.titre }}">
                     <div class="invalid-feedback">Veuillez entrer un titre.</div>
                 </div>
 
                 <div class="mb-3">
                     <label for="localisation" class="form-label fw-bold">Localisation (ville)</label>
-                    <input type="text" class="form-control {{ class_localisation }}" id="localisation" name="localisation" required value="{{ service.localisation }}">
+                    <input type="text" class="form-control {{ class_localisation }}" id="localisation" name="localisation"  value="{{ service.localisation }}">
                     <div class="invalid-feedback">Veuillez entrer la localisation.</div>
                 </div>
 
                 <div class="mb-3">
                     <label for="description" class="form-label fw-bold">Description</label>
-                    <textarea class="form-control {{ class_description }}" id="description" name="description" rows="4" required>{{ service.description }}</textarea>
+                    <textarea class="form-control {{ class_description }}" id="description" name="description" rows="4" >{{ service.description }}</textarea>
                     <div class="invalid-feedback">Veuillez entrer une description.</div>
                 </div>
 
                 <div class="mb-3">
                     <label for="cout" class="form-label fw-bold">Coût</label>
-                    <input type="number" class="form-control {{ class_cout }}" id="cout" name="cout" min="5" step="0.01" required value="{{ service.cout }}">
+                    <input type="number" class="form-control {{ class_cout }}" id="cout" name="cout" min="5" step="0.01"  value="{{ service.cout }}">
                     <div class="invalid-feedback">Veuillez entrer un coût valide.</div>
                 </div>
 

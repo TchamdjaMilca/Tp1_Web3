@@ -73,11 +73,13 @@ def ajouter_utilisateurs(conn, courriel, mot_de_passe, nom, prenom):
 def supprimer_utilisateur(conn, id_utilisateur):
     """Supprime un utilisateur"""
     with conn.get_curseur() as curseur:
-        curseur.execute("DELETE FROM utilisateurs WHERE id_utilisateur = %s", (id_utilisateur,))
+        curseur.execute("DELETE FROM reservations WHERE id_utilisateur = %s",(id_utilisateur,) )
+        curseur.execute("DELETE FROM services WHERE id_proprietaire = %s",(id_utilisateur,))
+        curseur.execute("DELETE FROM utilisateurs WHERE id_utilisateur = %s",(id_utilisateur,))
+       
 
 
-
-def obtenir_services_recents(conn, limit=5):
+def obtenir_services_recents(conn, limit = 5):
     """Retourne les derniers services actifs"""
     with conn.get_curseur() as curseur:
         curseur.execute("""
