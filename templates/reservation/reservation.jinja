@@ -13,7 +13,7 @@
           {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
               {% for category, message in messages %}
-                <div class="alert alert-{{ 'danger' if category in ['error', 'danger'] else category }} text-center">
+                <div class="alert alert-{{ 'danger' if category in ['error','danger'] else category }} text-center">
                   {{ message }}
                 </div>
               {% endfor %}
@@ -27,24 +27,15 @@
           <form method="POST" action="{{ url_for('reservation.reserver_service', id_service=service.id_service) }}">
             <div class="mb-3">
               <label for="date_heure_reservation" class="form-label">Date et heure souhaitées :</label>
-              <input 
-                type="datetime-local" 
-                id="date_heure_reservation" 
-                name="date_heure_reservation" 
-                class="form-control" 
-                required
-              >
+              <input type="datetime-local" id="date_heure_reservation" name="date_heure_reservation" class="form-control" required>
             </div>
-
             <div class="d-grid mt-4">
               <button type="submit" class="btn btn-primary">Confirmer la réservation</button>
             </div>
           </form>
 
           <div class="mt-4 text-center">
-            <a href="{{ url_for('services.liste') }}" class="btn btn-outline-secondary btn-sm">
-              Retour à la liste
-            </a>
+            <a href="{{ url_for('services.liste') }}" class="btn btn-outline-secondary btn-sm">Retour à la liste</a>
           </div>
         </div>
       </div>

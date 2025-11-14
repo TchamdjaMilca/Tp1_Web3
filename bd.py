@@ -134,8 +134,8 @@ def obtenir_service_par_id(conn, id_service):
 
 
 
-def mettre_a_jour_service(conn, id_service, titre, localisation, description, cout, actif, photo, id_categorie):
-    """Met à jour un service existant"""
+def mettre_a_jour_service(conn, id_service, titre, localisation, description, cout, actif, photo):
+    """Met à jour un service existant (sans changer la catégorie)"""
     with conn.get_curseur() as curseur:
         curseur.execute("""
             UPDATE services
@@ -144,10 +144,10 @@ def mettre_a_jour_service(conn, id_service, titre, localisation, description, co
                 description=%s,
                 cout=%s,
                 actif=%s,
-                photo=%s,
-                id_categorie=%s
+                photo=%s
             WHERE id_service=%s
-        """, (titre, localisation, description, cout, actif, photo, id_categorie, id_service))
+        """, (titre, localisation, description, cout, actif, photo, id_service))
+
     conn.commit()
 
 
@@ -179,19 +179,6 @@ def supprimer_service(conn, id_service, id_proprietaire):
         return curseur.rowcount > 0
 
 
-
-# dTef verifier_disponibilite(conn, id_service, date_reservation, heure_reservation):
-#     """Vérifie si un service est disponible à une date/heure donnée"""
-#     with conn.get_curseur() as curseur:
-#         curseur.execute("""
-#             SELEC COUNT(*) AS total
-#             FROM reservations
-#             WHERE id_service = %s
-#               AND date_reservation = %s
-#               AND heure_reservation = %s
-#         """, (id_service, date_reservation, heure_reservation))
-#         resultat = curseur.fetchone()
-#         return resultat["total"] == 0
 
 def ajouter_reservation(conn, id_utilisateur, id_service, date_heure_reservation):
     """Ajoute une réservation dans la BD"""

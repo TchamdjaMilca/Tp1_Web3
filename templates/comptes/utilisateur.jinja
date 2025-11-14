@@ -1,10 +1,25 @@
 {% extends "base.jinja" %}
 
 {% block contenu %}
-<h2>Espace utilisateur</h2>
-
-<ul>
-  <li><a href="{{ url_for('services.liste') }}">Voir les services disponibles</a></li>
-  <li><a href="{{ url_for('comptes.deconnexion') }}">Déconnexion</a></li>
-</ul>
+<div class="container mt-5">
+  <div class="card shadow-lg border-0">
+    <div class="card-header bg-primary text-white text-center">
+      <h2 class="mb-0"> Espace utilisateur</h2>
+    </div>
+    <div class="card-body text-center">
+      <p class="lead">Bienvenue dans votre espace personnel</p>
+      
+      <div class="list-group">
+        <a href="{{ url_for('services.liste') }}" 
+           class="list-group-item list-group-item-action">
+           Voir les services disponibles
+        </a>
+        <a href="{{ url_for('comptes.deconnexion') }}" 
+           class="list-group-item list-group-item-action text-danger">
+           Déconnexion
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
