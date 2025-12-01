@@ -1,7 +1,7 @@
 """
 COnnexion à la BD
 """
-
+import os
 import types
 import contextlib
 import mysql.connector
@@ -11,10 +11,10 @@ import mysql.connector
 def creer_connexion():
     """Crée une connexion à la base de données MySQL"""
     conn = mysql.connector.connect(
-        user="garneau",
-        password="qwerty_123",
-        host="127.0.0.1",
-        database="services",
+        user=os.getenv('BD_UTILISATEUR'),
+        password=os.getenv('BD_MDP'),
+        host=os.getenv('BD_SERVEUR'),
+        database=os.getenv('BD_NOM_SCHEMA'),
         raise_on_warnings=True
     )
 

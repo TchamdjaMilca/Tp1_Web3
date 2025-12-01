@@ -1,0 +1,4 @@
+/.env
+/.idea
+/.env_python_anywhere
+__pycache__/

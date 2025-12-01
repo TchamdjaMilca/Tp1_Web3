@@ -3,6 +3,8 @@ Pour démontrer l'utilisation des templates
 """
  
 import random
+import logging
+import dotenv
 import os
  
 from flask import Flask, render_template, request , abort  , redirect , make_response,session
@@ -16,6 +18,9 @@ from routes_compte import bp_compte
 from routes_reservation import bp_reservation
 from routes_service import bp_service
  
+if not os.getenv('BD_UTILISATEUR'):
+    dotenv.load_dotenv('.env')
+
 app = Flask(__name__)
 app.register_blueprint(bp_service, url_prefix='/services')
 app.register_blueprint(bp_compte, url_prefix='/comptes')
@@ -27,8 +32,7 @@ app.config['CHEMIN_VERS_IMAGES'] = os.path.join(app.root_path, *app.config['MORC
 
 logger = create_logger(app)
  
-app.secret_key = "Cette chaîne servira pour l'encryption de la session. \
-                  Elle doit être générée aléatoirement"
+app.secret_key = os.getenv('SECRET_SESSION')
 # app.secret_key ="e81ea91a141620d25a70f65c4d02e81d1a5fa7c8a5bc8fa8df6eda83300402ad"
  
 titres = {
