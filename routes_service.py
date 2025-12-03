@@ -1,4 +1,4 @@
-from flask import Blueprint,  render_template, request, redirect,flash,session,url_for, abort, current_app as app
+from flask import Blueprint,  render_template, request, redirect,flash,session,url_for, abort, current_app as app,jsonify
  
 import bd
 import os
@@ -118,20 +118,22 @@ def confirmation():
     """Page de confirmation générique"""
     return render_template('services/confirmation.jinja')
 
-@bp_service.route("/supprimer/<int:id_service>")
-def supprimmer_service(id_service):
-    """Permet à un utilisateur de supprimer un service qu'il a ajouté et non réservé"""
- 
-    id_utilisateur = session.get("id_utilisateur")
-   
-    with bd.creer_connexion() as connexion:
-        succes = bd.supprimer_service(connexion, id_service, id_utilisateur)
-        if succes:
-            message = " Service supprimé avec succès."
-        else:
-           message = " Impossible de supprimer ce service déjà réservé ."
- 
-    return render_template("/services/confirmation.jinja" , message=message, code=303)
+@bp_service.route("/api/supprimer/<int:id_service>", methods=["DELETE"])
+def api_supprimer_service(id_service):
+    try:
+        with bd.creer_connexion() as conn:
+            id_proprietaire = session.get("id_utilisateur")
+
+            succes = bd.supprimer_service(conn, id_service, id_proprietaire)
+
+        if not succes:
+            return jsonify({"succes": False, "message": "Impossible de supprimer ce service, car il possède des réservations"})
+
+        return jsonify({"succes": True})
+
+    except Exception :
+        return jsonify({"succes": False, "message": "Erreur serveur"})
+
 
 @bp_service.route('/modifier/<int:id_service>', methods=['GET', 'POST'])
 def modifier_service(id_service):
@@ -203,3 +205,33 @@ def modifier_service(id_service):
         abort(500, f"Erreur de mise à jour : {e}")
 
  
+@bp_service.route('/api/recherche')
+def recherche():
+    mots_cles = request.args.get('mots-cles', '').strip()
+    print(f"Recherche API appelée: '{mots_cles}'")   
+
+    anciennes = request.cookies.get("recherches", "")
+
+    if anciennes == "":
+        historique = []
+    else:
+        historique = anciennes.split(",")
+        
+
+    if mots_cles != "" and mots_cles not in historique:
+        historique.append(mots_cles)
+
+    while len(historique) > 5:
+        historique.pop(0)
+
+    try:
+        with bd.creer_connexion() as conn:
+            services = bd.rechercher_services(conn, mots_cles)
+            print(f"Résultats BD: {services}")
+    except Exception as e:
+        app.logger.error(f"Erreur BD dans /api/recherche : {e}")
+        resp.set_cookie("recherches", ",".join(historique))
+        return resp, 500
+    resp = jsonify(services)
+    resp.set_cookie("recherches", ",".join(historique))
+    return resp

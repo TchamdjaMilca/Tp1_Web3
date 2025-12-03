@@ -1,42 +1,55 @@
 {% extends "base.jinja" %}
 {% block title %}Liste des services{% endblock %}
 {% block active_liste %}active fw-bold{% endblock %}
-
+{% block scripts %}
+<script defer="defer" src="/static/js/utils-ajax.js"></script>
+<script defer="defer" src="/static/js/service.js"></script>
+{% endblock %}
 {% block contenu %}
 <div class="container mt-5">
   <h2 class="text-center mb-5 text-primary fw-bold">Liste des services</h2>
+          <div id="erreur" class="text-danger fw-bold mt-3"></div>
+
+  <div class="position-relative">
+    <label for="recherche" class="form-label fw-bold">Rechercher un service :</label>
+    <input type="text" name="service" id="service" placeholder="Rechercher un service" />
+    <div id="div-suggestions" class="suggestions"></div>
+
+  </div>
+
 
   {% if services %}
   <div class="row">
     {% for s in services %}
-    <div class="col-md-4 mb-4">
+    <div class="col-md-4 mb-4" id="{{ s.id_service }}">
       <div class="card shadow-sm border-0 h-100">
 
-        <img src="/static/images/{{ s.photo }}" class="card-img-top img-fluid" 
-             alt="photo du service" style="height:200px; object-fit:cover;">
+        <img src="/static/images/{{ s.photo }}" class="card-img-top img-fluid" alt="photo du service"
+          style="height:200px; object-fit:cover;">
 
         <div class="card-body d-flex flex-column">
           <h5 class="card-title text-primary fw-bold">{{ s.titre }}</h5>
           <p class="card-text text-muted">{{ s.description }}</p>
 
           <p class="card-text mb-1"><strong> Localisation :</strong> {{ s.localisation }}</p>
-          <p class="card-text mb-1"><strong> Catégorie :</strong> 
+          <p class="card-text mb-1"><strong> Catégorie :</strong>
             <span class="badge bg-primary">{{ s.nom_categorie }}</span>
           </p>
-          <p class="card-text mb-3"><strong>Coût :</strong> 
+          <p class="card-text mb-3"><strong>Coût :</strong>
             <span class="badge bg-info text-dark">{{ s.cout }} crédits</span>
           </p>
 
           {% if session.get("id_utilisateur") %}
-            {% if s.id_proprietaire == session.get("id_utilisateur") or 1 == session.get("id_utilisateur")  %}
-              <a href="{{ url_for('services.modifier_service', id_service=s.id_service) }}"
-                 class="btn btn-outline-primary w-100 mb-2">Modifier</a>
-              <a href="{{ url_for('services.supprimmer_service', id_service=s.id_service) }}"
-                 class="btn btn-outline-danger w-100">Supprimer</a>
-            {% elif s.actif %}
-              <a href="{{ url_for('reservation.reserver_service', id_service=s.id_service) }}"
-                 class="btn btn-primary w-100"> Réserver</a>
-            {% endif %}
+          {% if s.id_proprietaire == session.get("id_utilisateur") or 1 == session.get("id_utilisateur") %}
+          <a href="{{ url_for('services.modifier_service', id_service=s.id_service) }}"
+            class="btn btn-outline-primary w-100 mb-2">Modifier</a>
+          <button class="btn btn-outline-danger w-100 btn-supprimer" value="{{ s.id_service }}">
+            Supprimer
+          </button>
+          {% elif s.actif %}
+          <a href="{{ url_for('reservation.reserver_service', id_service=s.id_service) }}"
+            class="btn btn-primary w-100"> Réserver</a>
+          {% endif %}
           {% endif %}
         </div>
 
@@ -48,9 +61,9 @@
     {% endfor %}
   </div>
   {% else %}
-    <div class="alert alert-info text-center">
-      Aucun service n’a été ajouté pour le moment.
-    </div>
+  <div class="alert alert-info text-center">
+    Aucun service n’a été ajouté pour le moment.
+  </div>
   {% endif %}
 </div>
 {% endblock %}

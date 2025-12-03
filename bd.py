@@ -1,7 +1,7 @@
 """
 COnnexion à la BD
 """
-import os
+
 import types
 import contextlib
 import mysql.connector
@@ -11,10 +11,10 @@ import mysql.connector
 def creer_connexion():
     """Crée une connexion à la base de données MySQL"""
     conn = mysql.connector.connect(
-        user=os.getenv('BD_UTILISATEUR'),
-        password=os.getenv('BD_MDP'),
-        host=os.getenv('BD_SERVEUR'),
-        database=os.getenv('BD_NOM_SCHEMA'),
+        user="garneau",
+        password="qwerty_123",
+        host="127.0.0.1",
+        database="services",
         raise_on_warnings=True
     )
 
@@ -169,18 +169,15 @@ def obtenir_tous_les_services(conn):
 
 
 def supprimer_service(conn, id_service, id_proprietaire):
-    """Supprime un service appartenant à un utilisateur, s’il n’est pas réservé"""
+    """Supprime un service appartenant à un utilisateur"""
     with conn.get_curseur() as curseur:
         curseur.execute("""
             DELETE FROM services
             WHERE id_service = %s
               AND id_proprietaire = %s
-              AND id_service NOT IN (SELECT id_service FROM reservations)
         """, (id_service, id_proprietaire))
         conn.commit()
         return curseur.rowcount > 0
-
-
 
 def ajouter_reservation(conn, id_utilisateur, id_service, date_heure_reservation):
     """Ajoute une réservation dans la BD"""
@@ -230,3 +227,17 @@ def donner_credit_pour_ajout_service(conn, id_utilisateur, montant=20):
             "UPDATE utilisateurs SET credit = credit + %s WHERE id_utilisateur = %s",
             (montant, id_utilisateur)
         )
+def rechercher_services(conn, mots_cles):
+    """Recherche les services selon une partie du titre."""
+    mots_cles = mots_cles.strip()    
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT id_service, titre
+            FROM services 
+            WHERE LOWER(titre) LIKE LOWER(%s) AND actif = 1
+            ORDER BY titre
+            LIMIT 10
+        """, (f"%{mots_cles}%",))
+        
+        resultats = curseur.fetchall()
+        return resultats

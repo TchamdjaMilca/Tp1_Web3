@@ -11159,6 +11159,22 @@ nav ul li a:hover {
   color: white;
   background-color: var(--bs-primary);
 }
+.suggestions ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    
+    background-color: white;
+    border: 1px solid;
+}
+
+.suggestions li {
+    padding: 8px 12px;
+}
+
+.suggestions li:hover {
+    background-color: #0dcaf0;
+}
 
 footer {
   font-size: 90%;
