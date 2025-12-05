@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, abort, current_app as app
+from flask import Blueprint, jsonify,render_template, request, redirect, url_for, session, flash, abort, current_app as app
 from utilitaires import hacher_mdp
 import bd
 import re
@@ -165,12 +165,21 @@ def supprimer_compte(id_utilisateur):
         abort(500)
 
     if utilisateur is None:
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return jsonify({"succes": False, "message": "Utilisateur introuvable"}), 404
         abort(404)
 
     try:
         with bd.creer_connexion() as conn:
             bd.supprimer_utilisateur(conn, id_utilisateur)
     except Exception:
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return jsonify({"succes": False, "message": "Erreur serveur"}), 500
         abort(500)
 
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify({"succes": True, "id_utilisateur": id_utilisateur})
+
+    flash("Utilisateur supprimé avec succès.", "info")
     return redirect(url_for("comptes.liste_utilisateurs"))
+
