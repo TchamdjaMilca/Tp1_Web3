@@ -1,7 +1,12 @@
 {% extends "base.jinja" %}
 
 {% block title %}Réservation - {{ service.titre }}{% endblock %}
-
+{% block scripts %}
+<script>
+  const idService = {{ service.id_service }};
+</script>
+<script defer src="/static/js/reservation.js"></script>
+{% endblock %}
 {% block contenu %}
 <div class="container mt-5">
   <div class="row justify-content-center">

@@ -1,8 +1,21 @@
+
 {% extends "base.jinja" %}
+
+{% block scripts %}
+<script defer="defer" src="/static/js/utils-ajax.js"></script>
+<script defer="defer" src="/static/js/recherche_utilisateur.js"></script>
+{% endblock %}
 
 {% block contenu %}
 <div class="container mt-5">
   <div class="card shadow-lg border-0">
+
+
+    <input id="recherche-user" type="text" placeholder="Recherche d'utilisateur">
+    <ul id="liste-users"></ul>
+    <div id="chargement-users" class="masquer">Chargement…</div>
+    <div id="erreur-users" class="masquer text-danger"></div>
+
     <div class="card-header bg-gradient bg-primary text-white text-center py-3">
       <h2 class="mb-0"> Liste des utilisateurs</h2>
     </div>
@@ -30,7 +43,7 @@
               <td>{{ u.prenom }}</td>
               <td>
                 <span class="badge bg-light text-primary px-3 py-2">
-                   {{ u.credit }}
+                  {{ u.credit }}
                 </span>
               </td>
               <td>
@@ -41,7 +54,8 @@
                 {% endif %}
               </td>
               <td class="text-center">
-                <form method="POST" action="{{ url_for('comptes.supprimer_compte', id_utilisateur=u.id_utilisateur) }}" class="d-inline">
+                <form method="POST" action="{{ url_for('comptes.supprimer_compte', id_utilisateur=u.id_utilisateur) }}"
+                  class="d-inline">
                   <button type="submit" class="btn btn-outline-danger btn-sm">
                     Supprimer
                   </button>
@@ -55,26 +69,26 @@
 
       <div class="d-flex justify-content-between mt-4">
         <a href="{{ url_for('comptes.form_ajout_compter') }}" class="btn btn-success">
-           Ajouter un utilisateur
+          Ajouter un utilisateur
         </a>
 
         <div>
           <a href="{{ url_for('comptes.admin') }}" class="btn btn-secondary me-2">
-             Retour au tableau de bord
+            Retour au tableau de bord
           </a>
           <a href="{{ url_for('comptes.deconnexion') }}" class="btn btn-outline-primary">
-             Déconnexion
+            Déconnexion
           </a>
         </div>
       </div>
 
       {% else %}
       <div class="alert alert-warning text-center">
-         Aucun utilisateur trouvé.
+        Aucun utilisateur trouvé.
       </div>
       <div class="text-center mt-3">
         <a href="{{ url_for('comptes.form_ajout_compter') }}" class="btn btn-success">
-           Ajouter un utilisateur
+          Ajouter un utilisateur
         </a>
       </div>
       {% endif %}

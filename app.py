@@ -7,13 +7,14 @@ import logging
 import dotenv
 import os
  
-from flask import Flask, render_template, request , abort  , redirect , make_response,session
+from flask import Flask, render_template, request , abort  , redirect , make_response,session, jsonify, Blueprint
 import re
 import bd
 from flask_babel import Babel,numbers, dates
 from flask.logging import create_logger
 from datetime import date
  
+from routes_api import api   
 from routes_compte import bp_compte
 from routes_reservation import bp_reservation
 from routes_service import bp_service
@@ -25,7 +26,7 @@ app = Flask(__name__)
 app.register_blueprint(bp_service, url_prefix='/services')
 app.register_blueprint(bp_compte, url_prefix='/comptes')
 app.register_blueprint(bp_reservation, url_prefix='/reservation')
- 
+app.register_blueprint(api)
 app.config['MORCEAUX_VERS_IMAGES'] = ["static", "images"]
 app.config['ROUTE_VERS_IMAGES'] = "/".join(app.config['MORCEAUX_VERS_IMAGES'])
 app.config['CHEMIN_VERS_IMAGES'] = os.path.join(app.root_path, *app.config['MORCEAUX_VERS_IMAGES'])

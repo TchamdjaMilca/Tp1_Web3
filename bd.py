@@ -241,3 +241,14 @@ def rechercher_services(conn, mots_cles):
         
         resultats = curseur.fetchall()
         return resultats
+def rechercher_utilisateur(conn, email):
+    with conn.get_curseur() as curseur:
+        curseur.execute("""
+            SELECT id_utilisateur, nom, prenom, courriel
+            FROM utilisateurs
+            WHERE courriel LIKE %s
+            LIMIT 10
+        """, (f"%{email}%",))
+
+        return curseur.fetchall()
+

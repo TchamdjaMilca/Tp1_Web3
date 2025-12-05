@@ -59,3 +59,17 @@ def reserver_service(id_service):
     except Exception as e:
         app.logger.error(f"Erreur lors de la réservation du service {id_service}: {e}")
         abort(500, "Erreur serveur.")
+
+@bp_reservation.route("/verifier_disponibilite/<int:id_service>")
+def api_verifier_dispo(id_service):
+    date_heure = request.args.get("date_heure")
+    if not date_heure:
+        return {"erreur": "date_heure manquante"}, 400
+
+    try:
+        with bd.creer_connexion() as conn:
+            dispo = bd.verifier_disponibilite(conn, id_service, date_heure)
+        return {"disponible": dispo}, 200
+
+    except Exception as e:
+        return {"erreur": str(e)}, 500
