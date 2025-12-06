@@ -19,5 +19,31 @@ def api_rechercher_utilisateurs():
         return jsonify(resultats), 200
 
     except Exception as e:
-        print("Erreur BD", e)
-        return jsonify({"erreur": "Erreur serveur"}), 500
+        return jsonify({"erreur": "Erreur serveur"})
+@api.route('/recherche')
+def recherche():
+    mots_cles = request.args.get('mots-cles', '').strip()
+
+    try:
+        with bd.creer_connexion() as conn:
+            services = bd.rechercher_services(conn, mots_cles)
+    except Exception as e:
+        return jsonify([]), 500
+
+    return jsonify(services)
+@api.route("/supprimer/<int:id_service>", methods=["DELETE"])
+def api_supprimer_service(id_service):
+    try:
+        with bd.creer_connexion() as conn:
+            id_proprietaire = session.get("id_utilisateur")
+
+            succes = bd.supprimer_service(conn, id_service, id_proprietaire)
+
+        if not succes:
+            return jsonify({"succes": False, "message": "Impossible de supprimer ce service, car il possède des réservations"})
+
+        return jsonify({"succes": True})
+
+    except Exception :
+        return jsonify({"succes": False, "message": "Erreur serveur"})
+

@@ -4,9 +4,13 @@
 
 "use strict"
 
-let controleur = null
-const divSuggestions = document.getElementById("div-suggestions")
-const rechercherInput = document.getElementById("service")
+let divSuggestions = null;
+let rechercherInput = null;
+let controleur = null;
+let debut = 0;
+const limite = 6;
+let finished = false;
+let loading = false;
 
 
 /**
@@ -15,7 +19,6 @@ const rechercherInput = document.getElementById("service")
 function gererClicFenetre(evenement) {
     const clicDansDivision = divSuggestions.contains(evenement.target);
     console.log("Clic dans la zone cliquable ? " + clicDansDivision)
-
     if (!clicDansDivision) {
         divSuggestions.replaceChildren()
         divSuggestions.classList.remove("afficher")
@@ -31,60 +34,60 @@ function gererClicFenetre(evenement) {
  * elles sont "hard-codés" pour la démo.
  */
 async function afficherSuggestions() {
-    divSuggestions.replaceChildren()
 
-    divSuggestions.classList.add("afficher")
+    divSuggestions.replaceChildren();
+    divSuggestions.classList.add("afficher");
 
-    const ul = document.createElement("ul")
-    divSuggestions.append(ul)
+    const ul = document.createElement("ul");
+    divSuggestions.append(ul);
 
-    const motCle = rechercherInput.value
+    const motCle = rechercherInput.value;
 
     if (motCle.length < 3) {
         const li = document.createElement("li");
-        li.innerHTML = "Tape au moins 3 caractères";
+        li.textContent = "Tape au moins 3 caractères";
         li.style.color = "gray";
         ul.append(li);
 
     }
     else {
-        const parametres = {
-            "mots-cles": motCle
-        }
-
-        /* gestion du controleur */
 
         if (controleur)
             controleur.abort();
-
-        // Une nouvelle instance du AbortController
         controleur = new AbortController();
 
         const resultats = await envoyerRequeteAjax(
-            `/services/api/recherche`,
+            `/api/recherche`,
             "GET",
-            parametres,
+            { "mots-cles": motCle },
             controleur
-        )
+        );
 
         for (const service of resultats) {
-            const li = document.createElement("li")
-            li.innerHTML = " " + service.titre
-            ul.append(li)
+            const li = document.createElement("li");
+            li.textContent = service.titre;
+            li.dataset.id = service.id_service;
+            ul.append(li);
         }
 
         ul.addEventListener('click', function (e) {
-            rechercherInput.value = e.target.innerText;
-            // ajout au tableau du local storage
-            ajouterElementAuTableau(rechercherInput.value)
-            divSuggestions.innerHTML = ''; // Effacer la liste déroulante après la sélection
-        })
+            const id = e.target.dataset.id;
+
+            if (id) {
+                ajouterElementAuTableau(rechercherInput.value);
+
+                // TODO: rediriger vers la page du service
+
+            }
+
+
+        });
+
     }
 
 
-    // Ajout d'un événement sur tout le document (la fenêtre)
-    document.addEventListener("click", gererClicFenetre)
 }
+
 
 function getTableauFromLocalStorage() {
     let tableauEnregistre = localStorage.getItem('tableauLocal');
@@ -100,7 +103,6 @@ function ajouterElementAuTableau(nouvelElement) {
     // TODO : vérifier si l'élément n'existe pas déjà dans le tableau avant de l'ajouter
     if (!tableauActuel.includes(nouvelElement)) {
 
-        tableauActuel.push(nouvelElement);
 
         tableauActuel.push(nouvelElement);
         if (tableauActuel.length > 5) {
@@ -129,9 +131,13 @@ function afficherLocalStorage() {
 
     ul.addEventListener('click', function (e) {
         rechercherInput.value = e.target.innerText;    // la valeur sélectionnée avec le clic de la souris
+        afficherSuggestions();
         divSuggestions.innerHTML = ''; // Effacer la liste déroulante après la sélection
     })
+
 }
+
+
 async function supprimerService(e) {
     const id = e.currentTarget.value;
 
@@ -141,7 +147,7 @@ async function supprimerService(e) {
     controleur = new AbortController();
 
     const reponse = await envoyerRequeteAjax(
-        `/services/api/supprimer/${id}`,
+        `/api/supprimer/${id}`,
         "DELETE"
     );
 
@@ -155,23 +161,29 @@ async function supprimerService(e) {
     }
 }
 
-
-
 /**
  * Appelée lors de l'initialisation de la page
  */
-function initialisation() {
-    document
-        .getElementById("service")
-        .addEventListener("input", afficherSuggestions)
 
-    rechercherInput.addEventListener('focus', afficherLocalStorage)
+function initialisation() {
+
+
+    divSuggestions = document.getElementById("div-suggestions");
+    rechercherInput = document.getElementById("service");
+
+
+    rechercherInput.addEventListener("input", afficherSuggestions);
+    rechercherInput.addEventListener("focus", afficherLocalStorage);
+
 
     let boutons = document.getElementsByClassName("btn-supprimer");
-
     for (let i = 0; i < boutons.length; i++) {
         boutons[i].addEventListener("click", supprimerService);
     }
+
+    window.addEventListener("scroll", gererScroll);
+
 }
+
 
 window.addEventListener("load", initialisation)
