@@ -1,3 +1,5 @@
+"use strict";
+
 let ctrlUser = null;
 
 const rechercheUser = document.getElementById("recherche-user");
@@ -5,7 +7,9 @@ const listeUsers = document.getElementById("liste-users");
 const chargementUsers = document.getElementById("chargement-users");
 const erreurUsers = document.getElementById("erreur-users");
 
+listeUsers.innerHTML = "";
 function chargerHistorique() {
+    listeUsers.textContent = "";
     const hist = JSON.parse(localStorage.getItem("rechercheUsers") || "[]");
 
     for (const email of hist) {
@@ -22,12 +26,15 @@ function chargerHistorique() {
 
 function sauvegarderRecherche(email) {
     let hist = JSON.parse(localStorage.getItem("rechercheUsers") || "[]");
-
-    if (!hist.includes(email)) {
-        hist.push(email);
-        localStorage.setItem("rechercheUsers", JSON.stringify(hist));
+    hist = hist.filter(item => item !== email);
+    hist.push(email);
+    if (hist.length > 5) {
+        hist.shift();
     }
+    localStorage.setItem("rechercheUsers", JSON.stringify(hist));
 }
+
+
 
 async function rechercherUtilisateur() {
     const email = rechercheUser.value.trim();
@@ -36,14 +43,14 @@ async function rechercherUtilisateur() {
     chargementUsers.classList.add("masquer");
     erreurUsers.classList.add("masquer");
 
-    if (email.length < 4) return;
+    if (email.length < 3) return;
 
     chargementUsers.classList.remove("masquer");
+
 
     if (ctrlUser !== null) {
         ctrlUser.abort();
     }
-
     ctrlUser = new AbortController();
 
     try {
@@ -69,10 +76,18 @@ function afficherResultatsUsers(resultats) {
         const li = document.createElement("li");
         li.textContent = `${user.courriel} (${user.nom})`;
 
-        li.addEventListener("click", () => {
+        li.addEventListener("click", async () => {
             rechercheUser.value = user.courriel;
-            rechercherUtilisateur();
+
+            listeUsers.textContent = "";
+
+            const liUnique = document.createElement("li");
+            liUnique.textContent = `${user.courriel} (${user.nom})`;
+            listeUsers.append(liUnique);
+
+            sauvegarderRecherche(user.courriel);
         });
+
 
         listeUsers.append(li);
     }
@@ -88,6 +103,7 @@ function afficherErreurUsers(err) {
     chargementUsers.classList.add("masquer");
 }
 
+
 rechercheUser.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
         e.preventDefault();
@@ -100,40 +116,40 @@ window.addEventListener("load", () => {
     rechercheUser.addEventListener("input", rechercherUtilisateur);
 });
 
-document.addEventListener("DOMContentLoaded", function () {
 
+document.addEventListener("DOMContentLoaded", () => {
     const tbody = document.querySelector("tbody");
     if (!tbody) return;
 
-    tbody.addEventListener("click", function (e) {
+    tbody.addEventListener("click", async function (e) {
 
-        if (e.target.matches(".form-supprimer-utilisateur button")) {
+        if (!e.target.matches(".form-supprimer-utilisateur button")) return;
 
-            e.preventDefault(); 
+        e.preventDefault();
 
-            const form = e.target.closest("form");
-            const tr = form.closest("tr");
+        const form = e.target.closest("form");
+        const tr = form.closest("tr");
 
-            if (!confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) return;
+        if (!confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) return;
 
-            fetch(form.action, {
-                method: "POST",
-                headers: { "X-Requested-With": "XMLHttpRequest" }
-            })
-                .then(res => res.json())
-                .then(data => {
+        try {
 
-                    if (data.succes) {
-                        tr.remove(); 
-                        return;       
-                    }
+            const data = await envoyerRequeteAjax(
+                form.action,
+                "POST",
+                {},
+            );
 
-                    alert(data.message || "Erreur lors de la suppression.");
-                })
-                .catch(err => {
-                    console.error("Erreur AJAX:", err);
-                    alert("Erreur lors de la suppression.");
-                });
+            if (data.succes) {
+                tr.remove();
+                return;
+            }
+
+            alert(data.message || "Erreur lors de la suppression.");
+
+        } catch (err) {
+            console.error("Erreur AJAX:", err);
+            alert("Erreur lors de la suppression.");
         }
     });
 });
