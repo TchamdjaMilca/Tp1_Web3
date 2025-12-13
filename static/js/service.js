@@ -1,21 +1,14 @@
-/**
- * Script pour l'affichage de suggestion de recherche
- */
-
-"use strict"
+"use strict";
 
 let divSuggestions = null;
 let rechercherInput = null;
 let controleur = null;
-let debut = 0;
-const limite = 6;
-let finished = false;
-let loading = false;
+
+let visibles = 6;
+const increment = 3;
 
 
-/**
- * Appelée lors d'un clic dans la fenêtre.
- */
+
 function gererClicFenetre(evenement) {
     const clicDansDivision = divSuggestions.contains(evenement.target);
     console.log("Clic dans la zone cliquable ? " + clicDansDivision)
@@ -27,12 +20,6 @@ function gererClicFenetre(evenement) {
 }
 
 
-/**
- * Pour demander les suggestions au site web.
- *
- * On devrait procéder par AJAX pour récupérer les suggestions, mais
- * elles sont "hard-codés" pour la démo.
- */
 async function afficherSuggestions() {
 
     divSuggestions.replaceChildren();
@@ -41,110 +28,86 @@ async function afficherSuggestions() {
     const ul = document.createElement("ul");
     divSuggestions.append(ul);
 
-    const motCle = rechercherInput.value;
+    const motCle = rechercherInput.value.trim();
 
     if (motCle.length < 3) {
         const li = document.createElement("li");
         li.textContent = "Tape au moins 3 caractères";
         li.style.color = "gray";
         ul.append(li);
-
+        return;
     }
-    else {
 
-        if (controleur)
-            controleur.abort();
-        controleur = new AbortController();
+    if (controleur) controleur.abort();
+    controleur = new AbortController();
 
-        const resultats = await envoyerRequeteAjax(
-            `/api/recherche`,
-            "GET",
-            { "mots-cles": motCle },
-            controleur
-        );
+    const resultats = await envoyerRequeteAjax(
+        "/api/recherche",
+        "GET",
+        { "mots-cles": motCle },
+        controleur
+    );
 
-        for (const service of resultats) {
-            const li = document.createElement("li");
-            li.textContent = service.titre;
-            li.dataset.id = service.id_service;
-            ul.append(li);
+    for (const service of resultats) {
+        const li = document.createElement("li");
+        li.textContent = service.titre;
+        li.dataset.id = service.id_service;
+        ul.append(li);
+    }
+
+    ul.addEventListener("click", (e) => {
+        const id = e.target.dataset.id;
+        if (id) {
+            ajouterElementAuTableau(rechercherInput.value);
+            window.location.href = `/services/details/${id}`;
         }
+    });
 
-        ul.addEventListener('click', function (e) {
-            const id = e.target.dataset.id;
-
-            if (id) {
-                ajouterElementAuTableau(rechercherInput.value);
-
-                // TODO: rediriger vers la page du service
-
-            }
-
-
-        });
-
-    }
-
-
+    document.addEventListener("click", gererClicFenetre);
 }
 
 
 function getTableauFromLocalStorage() {
-    let tableauEnregistre = localStorage.getItem('tableauLocal');
-    // Si le tableau existe dans le localStorage, le parse en objet js (json) et le retourne, sinon retourne un tableau vide
-    return tableauEnregistre ? JSON.parse(tableauEnregistre) : [];
+    const data = localStorage.getItem("tableauLocal");
+    return data ? JSON.parse(data) : [];
 }
 
 function ajouterElementAuTableau(nouvelElement) {
-    // Récupérer le tableau actuel depuis le localStorage
-    let tableauActuel = getTableauFromLocalStorage();
+    let tableau = getTableauFromLocalStorage();
 
-    // Ajouter le nouvel élément au tableau
-    // TODO : vérifier si l'élément n'existe pas déjà dans le tableau avant de l'ajouter
-    if (!tableauActuel.includes(nouvelElement)) {
-
-
-        tableauActuel.push(nouvelElement);
-        if (tableauActuel.length > 5) {
-            tableauActuel.shift();
-        }
+    if (!tableau.includes(nouvelElement)) {
+        tableau.push(nouvelElement);
+        if (tableau.length > 5) tableau.shift();
     }
 
-
-    // Sauvegarder le tableau mis à jour dans le localStorage
-    localStorage.setItem('tableauLocal', JSON.stringify(tableauActuel));
+    localStorage.setItem("tableauLocal", JSON.stringify(tableau));
 }
 
 function afficherLocalStorage() {
-    let tableau = getTableauFromLocalStorage()
-    const ul = document.createElement("ul")
+    const tableau = getTableauFromLocalStorage();
+    const ul = document.createElement("ul");
 
-    divSuggestions.replaceChildren()
-    divSuggestions.classList.add("afficher")
-    divSuggestions.append(ul)
+    divSuggestions.replaceChildren();
+    divSuggestions.classList.add("afficher");
+    divSuggestions.append(ul);
 
     for (const t of tableau) {
-        const li = document.createElement("li")
-        li.innerHTML = " " + t + ""
-        ul.append(li)
+        const li = document.createElement("li");
+        li.textContent = t;
+        ul.append(li);
     }
 
-    ul.addEventListener('click', function (e) {
-        rechercherInput.value = e.target.innerText;    // la valeur sélectionnée avec le clic de la souris
+    ul.addEventListener("click", (e) => {
+        rechercherInput.value = e.target.innerText;
         afficherSuggestions();
-        divSuggestions.innerHTML = ''; // Effacer la liste déroulante après la sélection
-    })
-
+        divSuggestions.innerHTML = "";
+    });
 }
+
 
 
 async function supprimerService(e) {
     const id = e.currentTarget.value;
-
-    if (controleur)
-        controleur.abort();
-
-    controleur = new AbortController();
 
     const reponse = await envoyerRequeteAjax(
         `/api/supprimer/${id}`,
@@ -152,38 +115,56 @@ async function supprimerService(e) {
     );
 
     if (reponse.succes) {
-        let bloc = document.getElementById(id);
-        bloc.remove();
-    }
-    else {
-        let erreurSpan = document.getElementById("erreur");
-        erreurSpan.textContent = "Impossible de supprimer le service car il a des réservations associées.";
+        const bloc = document.getElementById(id);
+        if (bloc) bloc.remove();
+    } else {
+        document.getElementById("erreur").textContent =
+            "Impossible de supprimer le service car il a des réservations associées.";
     }
 }
 
-/**
- * Appelée lors de l'initialisation de la page
- */
+function afficherServices() {
+    const services = document.querySelectorAll(".service-item");
+
+    for (let i = 0; i < services.length; i++) {
+        if (i < visibles) {
+            services[i].classList.remove("d-none");
+        } else {
+            services[i].classList.add("d-none");
+        }
+    }
+    gererDefilement();
+}
+
+
+function gererDefilement() {
+     if ((window.innerHeight + window.scrollY) >= 0.95 * document.body.offsetHeight) {
+        visibles += increment;
+        afficherServices();
+    }
+}
+
 
 function initialisation() {
-
 
     divSuggestions = document.getElementById("div-suggestions");
     rechercherInput = document.getElementById("service");
 
-
     rechercherInput.addEventListener("input", afficherSuggestions);
     rechercherInput.addEventListener("focus", afficherLocalStorage);
 
-
-    let boutons = document.getElementsByClassName("btn-supprimer");
+    const boutons = document.getElementsByClassName("btn-supprimer");
     for (let i = 0; i < boutons.length; i++) {
         boutons[i].addEventListener("click", supprimerService);
     }
 
-    window.addEventListener("scroll", gererScroll);
+     const services = document.querySelectorAll(".service-item");
+    for (let i = 0; i < services.length; i++) {
+        services[i].classList.add("d-none");
+    }
+    afficherServices();
 
+    window.addEventListener("scroll", gererDefilement);
 }
 
-
-window.addEventListener("load", initialisation)
+window.addEventListener("load", initialisation);

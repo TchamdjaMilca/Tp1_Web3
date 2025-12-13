@@ -21,7 +21,7 @@
   {% if services %}
   <div class="row">
     {% for s in services %}
-    <div class="col-md-4 mb-4" id="{{ s.id_service }}">
+    <div class="col-md-4 mb-4 service-item" id="{{ s.id_service }}">
       <div class="card shadow-sm border-0 h-100">
 
         <img src="/static/images/{{ s.photo }}" class="card-img-top img-fluid" alt="photo du service"
