@@ -5,17 +5,16 @@ COnnexion à la BD
 import types
 import contextlib
 import mysql.connector
-import os
 
 
 @contextlib.contextmanager
 def creer_connexion():
     """Crée une connexion à la base de données MySQL"""
     conn = mysql.connector.connect(
-        user=os.getenv('BD_UTILISATEUR'),
-        password=os.getenv('BD_MDP'),
-        host=os.getenv('BD_SERVEUR'),
-        database=os.getenv('BD_NOM_SCHEMA'),
+        user="garneau",
+        password="qwerty_123",
+        host="127.0.0.1",
+        database="services",
         raise_on_warnings=True
     )
 
@@ -243,25 +242,13 @@ def rechercher_services(conn, mots_cles):
         resultats = curseur.fetchall()
         return resultats
 def rechercher_utilisateur(conn, email):
-    with conn.cursor() as curseur:
+    with conn.get_curseur() as curseur:
         curseur.execute("""
             SELECT id_utilisateur, nom, prenom, courriel
             FROM utilisateurs
             WHERE courriel LIKE %s
-            LIMIT 10;
+            LIMIT 10
         """, (f"%{email}%",))
 
-        lignes = curseur.fetchall()
-
-        resultats = []
-
-        for l in lignes:
-            resultats.append({
-                "id_utilisateur": l[0],
-                "nom": l[1],
-                "prenom": l[2],
-                "courriel": l[3]
-            })
-
-        return resultats
+        return curseur.fetchall()
 
