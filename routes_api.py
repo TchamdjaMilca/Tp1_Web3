@@ -47,3 +47,24 @@ def api_supprimer_service(id_service):
     except Exception :
         return jsonify({"succes": False, "message": "Erreur serveur"})
 
+@api.route("/utilisateurs/<int:id_utilisateur>", methods=["DELETE"])
+def api_supprimer_utilisateur(id_utilisateur):
+
+    if "id_utilisateur" not in session:
+        return jsonify({"succes": False}), 401
+
+    if not session.get("est_admin"):
+        return jsonify({"succes": False}), 403
+
+    try:
+        with bd.creer_connexion() as conn:
+            utilisateur = bd.obtenir_utilisateur_par_id(conn, id_utilisateur)
+            if utilisateur is None:
+                return jsonify({"succes": False, "message": "Introuvable"}), 404
+
+            bd.supprimer_utilisateur(conn, id_utilisateur)
+
+        return jsonify({"succes": True})
+
+    except Exception:
+        return jsonify({"succes": False, "message": "Erreur serveur"}), 500

@@ -53,12 +53,10 @@
                 {% endif %}
               </td>
               <td class="text-center">
-                <form method="POST" action="{{ url_for('comptes.supprimer_compte', id_utilisateur=u.id_utilisateur) }}"
-                  class="d-inline form-supprimer-utilisateur">
-                  <button type="submit" class="btn btn-outline-danger btn-sm">
-                    Supprimer
-                  </button>
-                </form>
+                <button class="btn btn-outline-danger btn-sm btn-supprimer-utilisateur"
+                  data-id="{{ u.id_utilisateur }}">
+                  Supprimer
+                </button>
               </td>
             </tr>
             {% endfor %}

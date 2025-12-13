@@ -116,40 +116,36 @@ window.addEventListener("load", () => {
     rechercheUser.addEventListener("input", rechercherUtilisateur);
 });
 
-
 document.addEventListener("DOMContentLoaded", () => {
     const tbody = document.querySelector("tbody");
     if (!tbody) return;
 
-    tbody.addEventListener("click", async function (e) {
+    tbody.addEventListener("click", async (e) => {
 
-        if (!e.target.matches(".form-supprimer-utilisateur button")) return;
+        if (!e.target.classList.contains("btn-supprimer-utilisateur")) return;
 
-        e.preventDefault();
-
-        const form = e.target.closest("form");
-        const tr = form.closest("tr");
+        const id = e.target.dataset.id;
+        const tr = e.target.closest("tr");
 
         if (!confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) return;
 
         try {
-
-            const data = await envoyerRequeteAjax(
-                form.action,
-                "POST",
-                {},
+            const reponse = await envoyerRequeteAjax(
+                `/api/utilisateurs/${id}`,
+                "DELETE"
             );
 
-            if (data.succes) {
+            if (reponse.succes) {
                 tr.remove();
-                return;
+            } else {
+                alert(reponse.message || "Erreur lors de la suppression");
             }
 
-            alert(data.message || "Erreur lors de la suppression.");
-
         } catch (err) {
-            console.error("Erreur AJAX:", err);
-            alert("Erreur lors de la suppression.");
+            alert("Erreur serveur");
+            console.error(err);
         }
     });
 });
+
+
