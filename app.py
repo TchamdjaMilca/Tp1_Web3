@@ -1,7 +1,7 @@
 """
 Pour démontrer l'utilisation des templates
 """
- 
+print(" FLASK VERSION 13 DÉC — TP1_WEB3 ")
 import random
 import logging
 import dotenv
